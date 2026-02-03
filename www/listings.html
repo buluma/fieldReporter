@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">-->
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+  <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">
+  <link rel="stylesheet" type="text/css" href="icomoon/icomoon.css">
+  <link rel="stylesheet" type="text/css" href="css/app.css">
+  <link rel="stylesheet" type="text/css" href="css/bootstrap-datetimepicker.css">
+  <script type="text/javascript" src="js/userdata.js"></script>
+  <script type="text/javascript" src="cordova.js"></script>
+  <title>EABL Listings</title>
+</head>
+<body>
+<div class="container m-scene" id="transition">
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header pull-left">
+    </div>
+    <div class="navbar-collapse pull-right">
+    </div>
+  </div>
+</nav>
+<div id="newsku">
+  <h4 class="pull-left">EABL Listings</h4>
+  <button id="addRecom" type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#form-modal">Add</button>
+</div>
+<article id="actionlist">
+<div class="pullRefresh align-center" style="display:none"><span class="glyphicon glyphicon-refresh"></span>Refreshing...</div>
+  <div class="list-group dataList"></div>
+</article>
+<!-- Modal -->
+<div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">New Outlet Listings Record</h4>
+      </div>
+      <div class="modal-body">
+        <style>
+            /*label, input.form-control,select.form-control {width:50%;float:left;}*/
+            input.form-control,select.form-control {height: 30px;padding: 2px 12px;font-size: 12px;border-radius: 0;}
+            .list-group-item {padding: 5px 15px;overflow:visible;}
+        </style>
+        <!-- our data form -->
+        <div class="list-group">
+          <form name="form_action" id="form_action" action="">
+            <div class="form-group list-group-item">
+              <label>Listing</label>
+              <select class="form-control" id="listing">
+                <option value="">Select Listing</option>
+                <option value="KC Coconut">KC Coconut</option>
+                <option value="Chrome Lemon">Chrome Lemon</option>
+                <option value="Whiskey">Orijin AHS</option>
+                <option value="McDowells">McDowells</option>
+                <option value="Tusker Gold">Tusker Gold</option>
+                <option value="Smirnoff Ginsen">Smirnoff Ginsen</option>
+                <option value="Chrome RTD">Chrome RTD</option>
+              </select>
+            </div>
+            <div class="form-group list-group-item">
+              <label>Listed</label>
+              <select class="form-control" id="listed">
+                <option value="Yes">Yes</option>
+                <option value="No">No</option>
+              </select>
+            </div>
+            <div class="form-group list-group-item">
+             <button class="btn btn-primary btn-block" type="submit" class="form-control" id="actionSubmit">Save</button>
+            </div>
+          </form>
+        </div>
+        <div class="alert alert-success alert-dismissible hidden" role="alert" id="FormNotification">
+        <p><span class="glyphicon glyphicon-ok"></span> Item Successfully Saved</p></div>
+        <!-- -->
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end modal -->
+<footer></footer>
+</div>
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/moment.js"></script>
+<script type="text/javascript" src="js/bootstrap-datetimepicker.js"></script>
+<!--<script type="text/javascript" src="js/jquery.smoothState.min.js"></script>-->
+<script type="text/javascript" src="js/storage.js"></script>
+<script type="text/javascript" src="js/functions.js"></script>
+<script type="text/javascript" src="js/listings.js"></script>
+<!--<script type="text/javascript" src="js/smooth.js"></script>-->
+<script type="text/javascript" src="icomoon/liga.js"></script>
+</body>
+</html>
