@@ -8,110 +8,101 @@
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
         <link rel="stylesheet" href="css/index.css">
+        <link rel="stylesheet" href="css/stores.css">
         <title>Stores - Field Reporter</title>
 </head>
 <body>
-<div class="container m-scene" id="transition">
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
-    <div class="navbar-header pull-left">
-      <h5>GBC - Stock Monitoring 2.0</h5>
-    </div>
-    <div class="pull-right">
-      <!--<button id="RefreshStores" type="button" class="btn btn-default item-action panelrefresh">
-          <span class="glyphicon glyphicon-refresh"></span>
-      </button>-->
-      <button type="button" id="btnlogout" class="btn btn-default"><span class="glyphicon glyphicon-log-out"></span></button>
-    </div>
-  </div>
-</nav>
-<div class="tabnavs">
-  <div class="container">
-  <ul class="nav nav-pills">
-    <li role="presentation"><a href="app.html">Home</a></li>
-    <li role="presentation" class="active" id="storeslink"><a href="stores.html">My Oulets</a></li>
-    <li role="presentation"><a href="sync.html">Data Sync</a></li>
-  </ul>
-  </div>
-</div>
-<div id="newstore" class="hidden">
-  <h4 class="pull-left"> New Outlet </h4>
-  <!--<button type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#form-modal">Add</button>-->
-</div>
-<article id="storelist" class="scene-fadeinright">
-<div class="pullRefresh align-center" style="display:none"><span class="glyphicon glyphicon-refresh"></span>Refreshing...</div>
-  <div class="list-group dataList">
+    <div class="app">
+        <div class="sticky-header">
+            <!-- Top navigation bar -->
+            <div class="top-bar">
+                <span class="title">GBC - Stock Monitoring 2.0</span>
+                <div id="logoutBtn" class="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </div>
+            </div>
 
-  </div>
-</article>
-<!-- Modal -->
-<div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">New Outlet</h4>
-      </div>
-      <div class="modal-body">
-        <!-- our data form -->
-         <div class="list-group">
-           <form name="formstore" id="formstore" action="">
-              <div class="form-group list-group-item">
-                 <input type="text" id="storename" class="form-control" name="store.name"placeholder="Store Name" required>
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="text" id="region" class="form-control" name="store.region" placeholder="Region" required>
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="text" id="location" class="form-control" name="store.location" placeholder="Store Location">
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="text" id="address" class="form-control" name="store.address" placeholder="Store Address">
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="tel" id="phone" class="form-control" name="store.phone" placeholder="Store Phone">
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="email" id="email" class="form-control" name="store.email" placeholder="Store Email">
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="text" id="contactperson" class="form-control" name="store.contactperson" placeholder="Contact Person">
-              </div>
-              <!--<div class="form-group list-group-item">
-                 <input type="text" id="coordinates" class="form-control" name="store.coordinates" placeholder="GPS Coordinates" disabled>
-              </div>
-              <div class="form-group list-group-item">
-                 <input type="text" id="photo" class="form-control" name="store.photo" placeholder="Store Photos" value="photo selection not enabled" disabled>
-              </div>-->
-              <div class="form-group list-group-item">
-                 <textarea id="storeremarks" class="form-control" name="store.notes" placeholder="Remarks" cols="30" rows="5"></textarea>
-              </div>
-              <div class="form-group list-group-item">
-                 <button class="btn btn-block btn-primary"  type="submit" name="store.submit" id="storeSubmit">Save</button
-              </div>
-            </form>
-         </div>
-         <div class="alert alert-success alert-dismissible hidden" role="alert" id="FormNotification"><p><span class="glyphicon glyphicon-ok"></span> Item Successfully Saved</p></div>
-        <!-- -->
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
-    </div>
-  </div>
-</div>
-<!-- end modal -->
-<footer>
-   <nav class="navbar navbar-default navbar-fixed-bottom" style="display:none">
-    <button id="addStore" type="button" class="btn btn-default float-button" data-toggle="modal" data-target="#form-modal">
-        +
-    </button>
-   </nav>
-</footer>
-</div> <!-- end transition container -->
-<script src="cordova.js"></script>
-<script src="js/db.js"></script>
-<script src="js/profile.js"></script>
-<script src="js/app.js"></script>
+            <div class="top-nav">
+                <div class="nav-tabs">
+                    <a href="index.html" class="nav-tab">Home</a>
+                    <a href="stores.html" class="nav-tab active">My Outlets</a>
+                    <a href="#" class="nav-tab">Data Sync</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="scrollable-content">
+            <div id="content" class="main-content">
+                <!-- Content from original stores.html goes here -->
+                <div id="newstore" class="hidden">
+                    <!--<button type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#form-modal">Add</button>-->
+                </div>
+                <article id="storelist" class="scene-fadeinright">
+                    <div class="pullRefresh align-center" style="display:none"><span>Refreshing...</span></div>
+                    <div class="store-card-container dataList">
+                        <!-- Stores will be listed here -->
+                    </div>
+                </article>
+                <!-- Modal for adding/editing store -->
+                <div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                                <h4 class="modal-title" id="myModalLabel">New Outlet</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="list-group">
+                                    <form name="formstore" id="formstore" action="">
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="storename" class="form-control" name="store.name"placeholder="Store Name" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="region" class="form-control" name="store.region" placeholder="Region" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="location" class="form-control" name="store.location" placeholder="Store Location">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="address" class="form-control" name="store.address" placeholder="Store Address">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="tel" id="phone" class="form-control" name="store.phone" placeholder="Store Phone">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="email" id="email" class="form-control" name="store.email" placeholder="Store Email">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="contactperson" class="form-control" name="store.contactperson" placeholder="Contact Person">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <textarea id="storeremarks" class="form-control" name="store.notes" placeholder="Remarks" cols="30" rows="5"></textarea>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <button class="btn btn-block btn-primary"  type="submit" name="store.submit" id="storeSubmit">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="alert alert-success alert-dismissible hidden" role="alert" id="FormNotification"><p><span></span> Item Successfully Saved</p></div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Floating Add Store Button -->
+                <button id="addStore" type="button" class="add-store-fab">+</button>
+            </div>
+        </div>
+
+        <script src="cordova.js"></script>
+        <script src="js/db.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/stores.js"></script>
 </body>
 </html>

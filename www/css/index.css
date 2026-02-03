@@ -204,3 +204,26 @@ h1 {
     padding:0px;
     text-align:center;
 }
+
+.add-store-fab {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    color: white;
+    font-size: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    cursor: pointer;
+    border: none;
+    z-index: 100;
+}
+
+.add-store-fab:hover {
+    background-color: #45a049;
+}

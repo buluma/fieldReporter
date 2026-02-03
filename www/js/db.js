@@ -1,8 +1,9 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 2; // Incremented to allow for schema changes
+const DB_VERSION = 3; // Incremented to allow for schema changes
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
+const STORES_STORE = 'stores'; // New store for outlets
 
 let db;
 
@@ -67,6 +68,14 @@ function initDB() {
                 loginLogStore.createIndex('username', 'username', { unique: false });
                 loginLogStore.createIndex('timestamp', 'timestamp', { unique: false });
                 console.log('Login log store created');
+            }
+
+            // Create stores object store if it doesn't exist
+            if (!db.objectStoreNames.contains(STORES_STORE)) {
+                const storesStore = db.createObjectStore(STORES_STORE, { keyPath: 'id', autoIncrement: true });
+                storesStore.createIndex('name', 'name', { unique: true });
+                storesStore.createIndex('region', 'region', { unique: false });
+                console.log('Stores store created');
             }
         };
     });
@@ -296,6 +305,134 @@ async function getAllLoginLogs() {
 
         request.onerror = () => {
             console.error('Error retrieving all login logs:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+/**
+ * Add a new store to the database
+ */
+async function addStore(storeData) {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+
+    const transaction = db.transaction([STORES_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(STORES_STORE);
+
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add(storeData);
+
+        request.onsuccess = () => {
+            console.log('Store added successfully');
+            resolve(request.result);
+        };
+
+        request.onerror = () => {
+            console.error('Error adding store:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+/**
+ * Get all stores from the database
+ */
+async function getAllStores() {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+
+    const transaction = db.transaction([STORES_STORE], 'readonly');
+    const objectStore = transaction.objectStore(STORES_STORE);
+
+    return new Promise((resolve, reject) => {
+        const request = objectStore.getAll();
+
+        request.onsuccess = () => {
+            resolve(request.result);
+        };
+
+        request.onerror = () => {
+            console.error('Error retrieving stores:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+/**
+ * Get a store by ID from the database
+ */
+async function getStoreById(id) {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+
+    const transaction = db.transaction([STORES_STORE], 'readonly');
+    const objectStore = transaction.objectStore(STORES_STORE);
+
+    return new Promise((resolve, reject) => {
+        const request = objectStore.get(id);
+
+        request.onsuccess = () => {
+            resolve(request.result);
+        };
+
+        request.onerror = () => {
+            console.error('Error retrieving store by ID:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+/**
+ * Update an existing store in the database
+ */
+async function updateStore(id, storeData) {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+
+    const transaction = db.transaction([STORES_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(STORES_STORE);
+
+    return new Promise((resolve, reject) => {
+        const request = objectStore.put({ ...storeData, id: id }); // Ensure ID is part of the object for put
+
+        request.onsuccess = () => {
+            console.log('Store updated successfully');
+            resolve(request.result);
+        };
+
+        request.onerror = () => {
+            console.error('Error updating store:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+/**
+ * Delete a store from the database
+ */
+async function deleteStore(id) {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+
+    const transaction = db.transaction([STORES_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(STORES_STORE);
+
+    return new Promise((resolve, reject) => {
+        const request = objectStore.delete(id);
+
+        request.onsuccess = () => {
+            console.log('Store deleted successfully');
+            resolve();
+        };
+
+        request.onerror = () => {
+            console.error('Error deleting store:', request.error);
             reject(request.error);
         };
     });
