@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 14; // Incremented for Objectives and Other Objectives
+const DB_VERSION = 15; // Incremented for Listings
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -13,6 +13,7 @@ const TL_FOCUS_STORE = 'tl_focus'; // New store for TL Focus Areas
 const TL_OBJECTIVES_STORE = 'tl_objectives'; // New store for TL Objectives
 const OBJECTIVES_STORE = 'objectives'; // New store for Field Objectives
 const OTHER_OBJECTIVES_STORE = 'other_objectives'; // New store for Other Objectives
+const LISTINGS_STORE = 'listings'; // New store for Product Listings
 
 let db;
 
@@ -163,6 +164,14 @@ function initDB() {
                 otherObjectivesStore.createIndex('store_id', 'store_id', { unique: false });
                 otherObjectivesStore.createIndex('created_on', 'created_on', { unique: false });
                 console.log('Other Objectives store created');
+            }
+
+            // Create listings object store if it doesn't exist
+            if (!db.objectStoreNames.contains(LISTINGS_STORE)) {
+                const listingsStore = db.createObjectStore(LISTINGS_STORE, { keyPath: 'id', autoIncrement: true });
+                listingsStore.createIndex('store_id', 'store_id', { unique: false });
+                listingsStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Listings store created');
             }
         };
     });
@@ -989,6 +998,42 @@ async function getOtherObjectivesByStore(storeId) {
     if (!db) throw new Error('Database not initialized');
     const transaction = db.transaction([OTHER_OBJECTIVES_STORE], 'readonly');
     const objectStore = transaction.objectStore(OTHER_OBJECTIVES_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Product Listing record
+ */
+async function addListing(listingData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([LISTINGS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(LISTINGS_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...listingData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get Product Listing records for a store
+ */
+async function getListingsByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([LISTINGS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(LISTINGS_STORE);
     const index = objectStore.index('store_id');
     
     return new Promise((resolve, reject) => {

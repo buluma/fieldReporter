@@ -1,68 +1,115 @@
-document.addEventListener("deviceready",function(){
-  fetchItems();
-},false);
-// grab url params
-// Getting URL var by its name
-var itemtype = $.getUrlVar('type');
-var itemid = $.getUrlVar('store_id');
-var storename = decodeURI($.getUrlVar('store_name'));
-var store_server_id = $.getUrlVar('store_server_id');
+document.addEventListener('DOMContentLoaded', async () => {
+    await initDB(); // Initialize DB
 
-$(document).ready(function(){
-	var backLink = '<h5><a href="storemenu.html?store_id='+itemid+'&store_server_id='+store_server_id+'&store_name='+storename+'" class="button">';
-  backLink += '<span class="glyphicon glyphicon-arrow-left"> '+storename+'</a></h5>';
-  $('.navbar-header').html(backLink);
-	$('form#form_action').on('submit', function(e){
-    e.preventDefault();
-    if (formValidated(this)){
-      saveItem();
-      $(this).each(function() {
-        this.reset();
-      });
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = urlParams.get('store_id');
+    const storeName = urlParams.get('store_name');
+
+    const pageTitle = document.getElementById('pageTitle');
+    const listingsList = document.querySelector('.dataList');
+    const formModal = document.getElementById('form-modal');
+    const formListing = document.getElementById('form_listing');
+    const formNotification = document.getElementById('formNotification');
+    const addListingBtn = document.getElementById('addListingBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const backToStoreBtn = document.getElementById('backToStoreBtn');
+
+    if (storeName) {
+        pageTitle.textContent = `Listings: ${decodeURIComponent(storeName)}`;
     }
-  });
-  $('#form-modal').on('hidden.bs.modal', function (e) {
-    fetchItems();
-  })
-});
 
-function saveItem() {
-  //var desc = document.getElementById("comments").value;
-  var listingx = document.getElementById("listing").value;
-  var islistedx = document.getElementById("listed").value;
-  var submitter = username;
-  var coords = userlocation;
-  var timestamp = Date.now();
+    // Modal Control
+    function showModal() {
+        formModal.style.display = 'block';
+        formModal.classList.add('in');
+        document.body.classList.add('modal-open');
+    }
 
-  db.transaction(function(st) {
-    //st.executeSql('DROP TABLE IF EXISTS data_tl_listings');
-    st.executeSql('CREATE TABLE IF NOT EXISTS data_tl_listings (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,coords VARCHAR, listing VARCHAR, listed INTEGER, submitter VARCHAR,store VARCHAR,store_id INTEGER, store_server_id VARCHAR,created_on TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,last_sync TEXT DEFAULT "none")');
+    function hideModal() {
+        formModal.style.display = 'none';
+        formModal.classList.remove('in');
+        document.body.classList.remove('modal-open');
+        resetForm();
+    }
 
-    st.executeSql("INSERT INTO data_tl_listings(coords,listing,listed,store,store_id,store_server_id,submitter) VALUES (?,?,?,?,?,?,?)",[coords,listingx,islistedx,storename,itemid,store_server_id,submitter], alertSuccess);
-  },function(st,err){
-    //console.log(st);
-    console.log(err);
-  },onReadyTransaction);
-}
+    function resetForm() {
+        formListing.reset();
+        formNotification.classList.add('hidden');
+    }
 
-function fetchItems() {
-  var q = "SELECT * FROM data_tl_listings WHERE store_id = ? ORDER BY created_on DESC LIMIT 0, 10";
-
-  db.transaction(function (t) {
-    t.executeSql(q, [itemid], function (t, data) {
-      //console.log(data.rows);
-      var cl = '';
-      for (var i =0;i<data.rows.length;i++) {
-        cl += '<a href="#" class="list-group-item">';
-        cl += '<h4 class="list-group-item-heading">'+data.rows.item(i).created_on+'</h4>';
-        cl += '<p>Listing: '+data.rows.item(i).listing+'</p>';
-        cl += '<p>Listed: '+data.rows.item(i).listed+'</p>';
-        cl += '<p>Store: '+data.rows.item(i).store+'</p>';
-        cl += '</a>';
-      }
-      $('article#actionlist .dataList').html(cl);
+    // Event Listeners
+    addListingBtn.addEventListener('click', showModal);
+    closeModalBtn.addEventListener('click', hideModal);
+    backToStoreBtn.addEventListener('click', () => {
+        window.location.href = `store.html?id=${storeId}`;
     });
-  },function(st,err){
-    console.log(err);
-  },onReadyTransaction);
-}
+
+    formListing.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        await saveListing();
+    });
+
+    async function saveListing() {
+        try {
+            const currentUser = getCurrentUser();
+            const location = await getUserLocation();
+            
+            const data = {
+                store_id: parseInt(storeId),
+                listing: document.getElementById('listing').value,
+                listed: document.getElementById('listed').value,
+                submitter: currentUser ? currentUser.username : 'Unknown',
+                coords: `${location.latitude},${location.longitude}`
+            };
+
+            await addListing(data);
+            
+            formNotification.classList.remove('hidden');
+            formListing.reset();
+            
+            // Refresh list
+            await fetchListings();
+            
+            // Hide modal after a short delay
+            setTimeout(hideModal, 1500);
+            
+        } catch (error) {
+            alert('Error saving listing: ' + error.message);
+        }
+    }
+
+    async function fetchListings() {
+        if (!storeId) return;
+        
+        listingsList.innerHTML = '<div class="list-group-item">Loading...</div>';
+        
+        try {
+            const items = await getListingsByStore(storeId);
+            listingsList.innerHTML = '';
+            
+            if (items.length === 0) {
+                listingsList.innerHTML = '<div class="list-group-item">No records found.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const date = new Date(item.created_on).toLocaleString();
+                const div = document.createElement('div');
+                div.className = 'list-group-item';
+                div.innerHTML = `
+                    <h4 class="list-group-item-heading" style="margin-bottom: 10px; color: #337ab7;">${item.listing}</h4>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 5px;">${date}</p>
+                    <p><strong>Listed:</strong> ${item.listed}</p>
+                    <p style="font-size: 10px; color: #999; margin-top: 10px;">By: ${item.submitter} | Loc: ${item.coords}</p>
+                `;
+                listingsList.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Error fetching listings:', error);
+            listingsList.innerHTML = `<div class="list-group-item error">Error: ${error.message}</div>`;
+        }
+    }
+
+    // Initial Load
+    await fetchListings();
+});

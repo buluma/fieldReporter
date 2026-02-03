@@ -123,27 +123,27 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     async function populateMenu() {
         const currentUser = getCurrentUser();
-        const menuItems = [
+        const commonItems = [
             { name: 'Availability', icon: '📋', link: 'availability.html', table: AVAILABILITY_STORE },
             { name: 'Placement', icon: '📂', link: 'placement.html', table: PLACEMENT_STORE },
             { name: 'Visibility', icon: '👁️', link: 'visibility.html', table: VISIBILITY_STORE },
-            { name: 'Activation', icon: '📊', link: 'activation.html', table: ACTIVATION_STORE }
+            { name: 'Activation', icon: '📊', link: 'activation.html', table: ACTIVATION_STORE },
+            { name: 'Listings', icon: '📜', link: 'listings.html', table: LISTINGS_STORE }
         ];
 
+        const roleSpecificItems = [];
         if (currentUser) {
             if (currentUser.assigned === 'team-leader') {
-                // Team Leader specific menus
-                menuItems.push({ name: 'My Objectives', icon: '🎯', link: 'tl_objectives.html', table: TL_OBJECTIVES_STORE });
-                menuItems.push({ name: 'Focus Areas', icon: '🔍', link: 'tl_focus.html', table: TL_FOCUS_STORE });
+                roleSpecificItems.push({ name: 'My Objectives', icon: '🎯', link: 'tl_objectives.html', table: TL_OBJECTIVES_STORE });
+                roleSpecificItems.push({ name: 'Focus Areas', icon: '🔍', link: 'tl_focus.html', table: TL_FOCUS_STORE });
             } else {
-                // Field Staff specific menus (default)
-                menuItems.push({ name: 'Objectives', icon: '🎯', link: 'objectives.html', table: OBJECTIVES_STORE });
-                menuItems.push({ name: 'Other Objectives', icon: '📝', link: 'other_objectives.html', table: OTHER_OBJECTIVES_STORE });
+                roleSpecificItems.push({ name: 'Objectives', icon: '🎯', link: 'objectives.html', table: OBJECTIVES_STORE });
+                roleSpecificItems.push({ name: 'Other Objectives', icon: '📝', link: 'other_objectives.html', table: OTHER_OBJECTIVES_STORE });
             }
         }
 
-        let html = '';
-        for (const item of menuItems) {
+        let html = '<div class="store-grid-menu">';
+        for (const item of commonItems) {
             let count = 0;
             try {
                 count = await getRecordCountByStore(item.table, storeId);
@@ -160,6 +160,35 @@ document.addEventListener('DOMContentLoaded', async () => {
                 </a>
             `;
         }
+        html += '</div>';
+
+        if (roleSpecificItems.length > 0) {
+            html += `
+                <div class="quick-input-header" style="margin-top: 20px;">
+                    <h4>Role Specific Activities</h4>
+                </div>
+                <div class="store-grid-menu">
+            `;
+            for (const item of roleSpecificItems) {
+                let count = 0;
+                try {
+                    count = await getRecordCountByStore(item.table, storeId);
+                } catch (error) {
+                    console.warn(`Error getting count for ${item.name}:`, error);
+                }
+
+                html += `
+                    <a href="${item.link}?store_id=${storeId}&store_name=${encodeURIComponent(currentStore.name)}" class="store-menu-item">
+                        <div class="btn btn-default btn-block">
+                            <span class="big-icon">${item.icon}</span>
+                            <h4>${item.name} (${count})</h4>
+                        </div>
+                    </a>
+                `;
+            }
+            html += '</div>';
+        }
+        
         storeMenuElement.innerHTML = html;
     }
 
