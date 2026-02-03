@@ -1,147 +1,129 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-    <title>Login Logs - Field Reporter</title>
-    <link rel="stylesheet" href="css/index.css">
-    <style>
-        .logs-container {
-            padding: 20px;
-            max-width: 1000px;
-            margin: 0 auto;
-        }
-        
-        .logs-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .logs-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
-        
-        .logs-table th, .logs-table td {
-            padding: 10px;
-            text-align: left;
-            border-bottom: 1px solid #ddd;
-        }
-        
-        .logs-table th {
-            background-color: #f2f2f2;
-            font-weight: bold;
-        }
-        
-        .logs-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
-        
-        .back-btn {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 20px;
-            text-decoration: none;
-            border-radius: 4px;
-            display: inline-block;
-            margin-bottom: 20px;
-        }
-        
-        .back-btn:hover {
-            background-color: #45a049;
-        }
-        
-        .loading {
-            text-align: center;
-            padding: 20px;
-        }
-        
-        .error {
-            color: red;
-            padding: 10px;
-            background-color: #ffe6e6;
-            border-radius: 4px;
-            margin: 10px 0;
-        }
-    </style>
-</head>
-<body>
-    <div class="logs-container">
-        <div class="logs-header">
-            <h1>Login Activity Logs</h1>
-            <a href="index.html" class="back-btn">Back to App</a>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="css/index.css">
+        <title>Login Logs - Field Reporter</title>
+        <style>
+            .logs-container {
+                padding: 20px;
+                max-width: 1000px;
+                margin: 0 auto;
+            }
+            
+            .logs-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+            }
+            
+            .logs-table {
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 20px;
+            }
+            
+            .logs-table th, .logs-table td {
+                padding: 10px;
+                text-align: left;
+                border-bottom: 1px solid #ddd;
+            }
+            
+            .logs-table th {
+                background-color: #f2f2f2;
+                font-weight: bold;
+            }
+            
+            .logs-table tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+            
+            .back-btn {
+                background-color: #4CAF50;
+                color: white;
+                padding: 10px 20px;
+                text-decoration: none;
+                border-radius: 4px;
+                display: inline-block;
+                margin-bottom: 20px;
+            }
+            
+            .back-btn:hover {
+                background-color: #45a049;
+            }
+            
+            .loading {
+                text-align: center;
+                padding: 20px;
+            }
+            
+            .error {
+                color: red;
+                padding: 10px;
+                background-color: #ffe6e6;
+                border-radius: 4px;
+                margin: 10px 0;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="app">
+            <!-- Top navigation bar -->
+            <div class="top-bar">
+                <span class="title">Login Logs</span>
+                <div class="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21.5 2v6h-6M2.5 22v-6h6"/>
+                        <path d="M22 11.5A10 10 0 0 0 3.5 12.5"/>
+                        <path d="M2 12.5a10 10 0 0 0 18.5-1"/>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="top-nav">
+                <div class="nav-tabs">
+                    <button class="nav-tab" onclick="window.location.href='index.html'">Home</button>
+                    <button class="nav-tab" onclick="window.location.href='index.html'">My Outlets</button>
+                    <button class="nav-tab" onclick="window.location.href='index.html'">Data Sync</button>
+                </div>
+            </div>
+            
+            <!-- Main content area -->
+            <div id="content" class="main-content">
+                <div class="logs-container">
+                    <div class="logs-header">
+                        <h1>Login Activity Logs</h1>
+                        <a href="index.html" class="back-btn">Back to App</a>
+                    </div>
+                    
+                    <div id="loading" class="loading">Loading login logs...</div>
+                    <div id="error" class="error" style="display: none;"></div>
+                    
+                    <table id="logsTable" class="logs-table" style="display: none;">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>User ID</th>
+                                <th>Timestamp</th>
+                                <th>Event Type</th>
+                            </tr>
+                        </thead>
+                        <tbody id="logsTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
         
-        <div id="loading" class="loading">Loading login logs...</div>
-        <div id="error" class="error" style="display: none;"></div>
-        
-        <table id="logsTable" class="logs-table" style="display: none;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>User ID</th>
-                    <th>Timestamp</th>
-                    <th>Event Type</th>
-                </tr>
-            </thead>
-            <tbody id="logsTableBody">
-            </tbody>
-        </table>
-    </div>
-    
-    <script src="js/db.js"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', async function() {
-            const loadingElement = document.getElementById('loading');
-            const errorElement = document.getElementById('error');
-            const logsTable = document.getElementById('logsTable');
-            const logsTableBody = document.getElementById('logsTableBody');
-            
-            try {
-                // Initialize the database
-                await initDB();
-                
-                // Get all login logs
-                const logs = await getAllLoginLogs();
-                
-                // Clear loading message
-                loadingElement.style.display = 'none';
-                
-                if (logs.length === 0) {
-                    logsTableBody.innerHTML = '<tr><td colspan="5">No login logs found.</td></tr>';
-                } else {
-                    // Populate the table with logs
-                    logs.forEach(log => {
-                        const row = document.createElement('tr');
-                        
-                        // Format the timestamp for better readability
-                        const date = new Date(log.timestamp);
-                        const formattedDate = date.toLocaleString();
-                        
-                        row.innerHTML = `
-                            <td>${log.id}</td>
-                            <td>${log.username}</td>
-                            <td>${log.userId}</td>
-                            <td>${formattedDate}</td>
-                            <td>${log.eventType}</td>
-                        `;
-                        logsTableBody.appendChild(row);
-                    });
-                }
-                
-                // Show the table
-                logsTable.style.display = 'table';
-            } catch (error) {
-                console.error('Error loading login logs:', error);
-                loadingElement.style.display = 'none';
-                errorElement.textContent = 'Error loading login logs: ' + error.message;
-                errorElement.style.display = 'block';
-            }
-        });
-    </script>
-</body>
+        <script src="cordova.js"></script>
+        <script src="js/db.js"></script>
+        <script src="js/login-logs.js"></script>
+    </body>
 </html>

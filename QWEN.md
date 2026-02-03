@@ -2,12 +2,12 @@
 
 ## Project Overview
 
-Field Reporter is a sample Apache Cordova application that demonstrates the basic structure and functionality of a mobile application built with the Cordova framework. The application is designed to respond to the `deviceready` event, which signals that Cordova's device APIs are available for use.
+Field Reporter is a comprehensive Apache Cordova application that demonstrates a complete mobile application with authentication, data persistence, and a modern UI. The application features user authentication with IndexedDB for local storage, login activity tracking, and a responsive card-based interface.
 
 - **Name**: fieldReporter
 - **Version**: 1.0.0
 - **Platform**: Apache Cordova
-- **Description**: Sample Apache Cordova application that responds to the deviceready event
+- **Description**: A field reporting application with authentication and data tracking capabilities
 - **Main Entry Point**: index.js
 
 ## Project Structure
@@ -16,14 +16,22 @@ Field Reporter is a sample Apache Cordova application that demonstrates the basi
 fieldReporter/
 ├── config.xml              # Cordova configuration file
 ├── package.json            # Node.js package manifest
+├── QWEN.md                 # Project documentation
 ├── www/                    # Web assets directory
-│   ├── index.html          # Main HTML entry point
+│   ├── index.html          # Main application dashboard
+│   ├── login.html          # Login page
+│   ├── profile.html        # User profile page
+│   ├── login-logs.html     # Login activity logs page
+│   ├── test-setup.html     # Test user setup utility
 │   ├── css/
-│   │   └── index.css       # Application styles
+│   │   ├── index.css       # Main application styles
+│   │   └── login.css       # Login page specific styles
 │   ├── img/
 │   │   └── logo.png        # Application logo
 │   └── js/
-│       └── index.js        # Main JavaScript logic
+│       ├── db.js           # IndexedDB database operations
+│       ├── index.js        # Main application logic
+│       └── login.js        # Login page specific logic
 └── .gitignore              # Git ignore rules
 ```
 
@@ -40,22 +48,82 @@ Contains the Node.js package information for the Cordova application, including:
 - Scripts: Basic test script
 - Keywords: `ecosystem:cordova`
 
-### index.html
-The main HTML file that sets up the application's user interface. It includes:
-- Content security policy for security
-- Responsive viewport configuration
-- Link to the Cordova JavaScript bridge
-- Basic UI with a logo and status indicators
+### Database Layer (db.js)
+Implements a comprehensive IndexedDB solution with:
+- User authentication and management
+- Password hashing using SHA-256
+- Login activity logging
+- Automatic creation of default 'admin' user on first run
+- Session management using sessionStorage
 
-### index.js
-The main JavaScript file that handles the `deviceready` event. When Cordova is ready, it adds a 'ready' class to the deviceready element, which triggers visual changes in the UI.
+### Authentication System
+- Secure login with username/password validation
+- Automatic redirection to login for unauthenticated users
+- Session persistence during browser sessions
+- Default credentials: admin/admin123 (for development/testing)
 
-### index.css
-Contains the styling for the application, including:
-- Mobile-specific CSS properties
-- Portrait and landscape layouts
+### User Interface
+- Modern card-based dashboard design
+- Responsive layout for mobile devices
+- Consistent navigation across pages
 - Dark mode support
-- Animations and transitions
+- Intuitive user experience
+
+## Pages
+
+### index.html (Dashboard)
+The main application dashboard featuring:
+- Top navigation bar with tabs
+- User information display with date
+- Four main function cards:
+  * My Field Reports (dark blue)
+  * Report Scheduler (light blue)
+  * Location Manager (gray)
+  * Data Synchronization (green)
+- Login Activity card linking to logs
+- Bottom navigation bar
+
+### login.html
+The authentication page with:
+- Username and password fields
+- Form validation
+- Error messaging
+- Default credentials pre-filled for development
+- Registration link placeholder
+
+### profile.html
+The user profile page showing:
+- User ID, username, email, and account creation date
+- Recent login activity
+- Back to home navigation
+
+### login-logs.html
+The login activity logs page displaying:
+- Table of all successful login attempts
+- Timestamps and user information
+- Export functionality
+
+## Key Features
+
+### Authentication & Security
+- IndexedDB-based user storage
+- SHA-256 password hashing
+- Session management
+- Automatic default user creation
+- Secure login flow
+
+### Data Management
+- Client-side data persistence using IndexedDB
+- User management system
+- Login activity tracking
+- Session state management
+
+### UI/UX
+- Modern card-based interface
+- Responsive design for mobile devices
+- Consistent navigation patterns
+- Visual feedback and error handling
+- Dark mode support
 
 ## Building and Running
 
@@ -83,18 +151,10 @@ cordova run ios
 The application follows Cordova's convention of waiting for the `deviceready` event before using any of Cordova's device APIs. This ensures that all Cordova plugins and APIs are properly loaded before they're used.
 
 ### Security
-The application implements Content Security Policy (CSP) to mitigate risks of XSS vulnerabilities. Inline scripts are disabled by default, following security best practices.
+The application implements Content Security Policy (CSP) to mitigate risks of XSS vulnerabilities. Passwords are hashed before storage using SHA-256 algorithm.
 
 ### Responsive Design
 The CSS includes responsive design considerations for both portrait and landscape orientations, with special handling for devices with notches or other "unsafe" areas.
-
-## Features
-
-- Basic device ready detection
-- Responsive UI that adapts to device orientation
-- Dark mode support
-- Cross-platform compatibility (Android, iOS, etc.)
-- Security-focused content policy
 
 ## Testing
 

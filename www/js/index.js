@@ -57,8 +57,12 @@ function checkAuthStatus() {
 function showUserInfo() {
     const currentUser = getCurrentUser();
     if (currentUser) {
-        // Set static date from the screenshot
-        document.getElementById('currentDate').textContent = '3-2-2026';
+        document.getElementById('usernameDisplay').textContent = currentUser.username;
+
+        // Set current date
+        const today = new Date();
+        const dateString = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+        document.getElementById('currentDate').textContent = dateString;
 
         document.getElementById('userInfo').style.display = 'flex';
     }
