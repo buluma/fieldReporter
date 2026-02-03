@@ -610,6 +610,22 @@ async function getActiveCheckin(storeId) {
 }
 
 /**
+ * Get record count for a store in a specific table
+ */
+async function getRecordCountByStore(tableName, storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([tableName], 'readonly');
+    const objectStore = transaction.objectStore(tableName);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.count(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
  * Add availability record
  */
 async function addAvailability(availabilityData) {

@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             checkinActionElement.innerHTML = '<button id="checkoutBtn" class="btn btn-danger">Check Out</button>';
             checkinWarningElement.classList.add('hidden');
             storeMenuElement.classList.remove('hidden');
-            populateMenu();
+            await populateMenu();
             
             document.getElementById('checkoutBtn').addEventListener('click', handleCheckOut);
         } else {
@@ -121,25 +121,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         storeInfoElement.innerHTML = html;
     }
 
-    function populateMenu() {
+    async function populateMenu() {
         const menuItems = [
-            { name: 'Availability', icon: '📋', link: 'availability.html' },
-            { name: 'Placement', icon: '📂', link: 'placement.html' },
-            { name: 'Visibility', icon: '👁️', link: 'visibility.html' },
-            { name: 'Activation', icon: '📊', link: 'activation.html' }
+            { name: 'Availability', icon: '📋', link: 'availability.html', table: AVAILABILITY_STORE },
+            { name: 'Placement', icon: '📂', link: 'placement.html', table: PLACEMENT_STORE },
+            { name: 'Visibility', icon: '👁️', link: 'visibility.html', table: VISIBILITY_STORE },
+            { name: 'Activation', icon: '📊', link: 'activation.html', table: ACTIVATION_STORE }
         ];
 
         let html = '';
-        menuItems.forEach(item => {
+        for (const item of menuItems) {
+            let count = 0;
+            try {
+                count = await getRecordCountByStore(item.table, storeId);
+            } catch (error) {
+                console.warn(`Error getting count for ${item.name}:`, error);
+            }
+
             html += `
                 <a href="${item.link}?store_id=${storeId}&store_name=${encodeURIComponent(currentStore.name)}" class="store-menu-item">
                     <div class="btn btn-default btn-block">
                         <span class="big-icon">${item.icon}</span>
-                        <h4>${item.name}</h4>
+                        <h4>${item.name} (${count})</h4>
                     </div>
                 </a>
             `;
-        });
+        }
         storeMenuElement.innerHTML = html;
     }
 
