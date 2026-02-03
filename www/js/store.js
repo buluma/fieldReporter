@@ -122,12 +122,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     async function populateMenu() {
+        const currentUser = getCurrentUser();
         const menuItems = [
             { name: 'Availability', icon: '📋', link: 'availability.html', table: AVAILABILITY_STORE },
             { name: 'Placement', icon: '📂', link: 'placement.html', table: PLACEMENT_STORE },
             { name: 'Visibility', icon: '👁️', link: 'visibility.html', table: VISIBILITY_STORE },
             { name: 'Activation', icon: '📊', link: 'activation.html', table: ACTIVATION_STORE }
         ];
+
+        // Add TL specific items if role matches
+        if (currentUser && currentUser.assigned === 'team-leader') {
+            menuItems.push({ name: 'My Objectives', icon: '🎯', link: 'tl_objectives.html', table: TL_OBJECTIVES_STORE });
+            menuItems.push({ name: 'Focus Areas', icon: '🔍', link: 'tl_focus.html', table: TL_FOCUS_STORE });
+        }
 
         let html = '';
         for (const item of menuItems) {

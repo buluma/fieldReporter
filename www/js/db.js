@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 12; // Incremented for user 'assigned' field and update functionality
+const DB_VERSION = 13; // Incremented for TL Focus and Objectives
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -9,6 +9,8 @@ const AVAILABILITY_STORE = 'availability'; // New store for availability status
 const PLACEMENT_STORE = 'placement'; // New store for placement status
 const ACTIVATION_STORE = 'activation'; // New store for activation status
 const VISIBILITY_STORE = 'visibility'; // New store for visibility status
+const TL_FOCUS_STORE = 'tl_focus'; // New store for TL Focus Areas
+const TL_OBJECTIVES_STORE = 'tl_objectives'; // New store for TL Objectives
 
 let db;
 
@@ -127,6 +129,22 @@ function initDB() {
                 visibilityStore.createIndex('store_id', 'store_id', { unique: false });
                 visibilityStore.createIndex('created_on', 'created_on', { unique: false });
                 console.log('Visibility store created');
+            }
+
+            // Create tl_focus object store if it doesn't exist
+            if (!db.objectStoreNames.contains(TL_FOCUS_STORE)) {
+                const tlFocusStore = db.createObjectStore(TL_FOCUS_STORE, { keyPath: 'id', autoIncrement: true });
+                tlFocusStore.createIndex('store_id', 'store_id', { unique: false });
+                tlFocusStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('TL Focus store created');
+            }
+
+            // Create tl_objectives object store if it doesn't exist
+            if (!db.objectStoreNames.contains(TL_OBJECTIVES_STORE)) {
+                const tlObjectivesStore = db.createObjectStore(TL_OBJECTIVES_STORE, { keyPath: 'id', autoIncrement: true });
+                tlObjectivesStore.createIndex('store_id', 'store_id', { unique: false });
+                tlObjectivesStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('TL Objectives store created');
             }
         };
     });
@@ -809,6 +827,78 @@ async function getVisibilityByStore(storeId) {
     if (!db) throw new Error('Database not initialized');
     const transaction = db.transaction([VISIBILITY_STORE], 'readonly');
     const objectStore = transaction.objectStore(VISIBILITY_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add TL Focus Area record
+ */
+async function addTLFocus(focusData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([TL_FOCUS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(TL_FOCUS_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...focusData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get TL Focus Area records for a store
+ */
+async function getTLFocusByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([TL_FOCUS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(TL_FOCUS_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add TL Objective record
+ */
+async function addTLObjective(objectiveData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([TL_OBJECTIVES_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(TL_OBJECTIVES_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...objectiveData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get TL Objective records for a store
+ */
+async function getTLObjectiveByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([TL_OBJECTIVES_STORE], 'readonly');
+    const objectStore = transaction.objectStore(TL_OBJECTIVES_STORE);
     const index = objectStore.index('store_id');
     
     return new Promise((resolve, reject) => {

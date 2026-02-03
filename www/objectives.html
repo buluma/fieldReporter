@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta name="format-detection" content="telephone=no">
+  <meta name="msapplication-tap-highlight" content="no">
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
+  <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">       
+  <link rel="stylesheet" type="text/css" href="icomoon/icomoon.css">
+  <link rel="stylesheet" type="text/css" href="css/app.css">
+  <script type="text/javascript" src="js/userdata.js"></script>
+  <script type="text/javascript" src="cordova.js"></script>
+  <title>Objectives</title>
+</head>
+<body>
+<div class="container">
+<nav class="navbar navbar-default navbar-fixed-top">
+  <div class="container-fluid">
+    <div class="navbar-header pull-left">  </div>
+    <div class="pull-right">   </div>
+  </div>
+</nav>
+<div id="newsku"></div>
+<article id="objectivelist">
+<div class="pullRefresh align-center" style="display:none"><span class="glyphicon glyphicon-refresh"></span>Refreshing...</div>
+  <div class="list-group dataList">   </div>
+</article>
+<!-- Modal -->
+<div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+  <div class="modal-dialog" role="document">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title" id="myModalLabel">Objective Score</h4>
+      </div>
+      <div class="modal-body">
+        <style>
+            /*label, input.form-control,select.form-control {width:50%;float:left;}*/
+            input.form-control,select.form-control {height: 25px;padding: 2px 12px;font-size: 11px;border-radius: 0;}
+            .list-group-item {padding: 5px 15px;overflow:visible;}
+        </style>
+        <!-- our data form -->
+        <div class="list-group">
+          <form name="objectivesinput" id="objectivesinput" action="">
+            <div class="form-group list-group-item" id="selectobjectives"></div> 
+            <div class="score-group" style="display:none;">
+              <div class="form-group list-group-item">
+               <label>Target Score (%)</label>
+               <input type="number" id="obj_tgt_score" class="form-control" value="0" placeholder="Target Score"> 
+              </div>
+              <div class="form-group list-group-item">
+               <label>No of Facings</label>
+               <input type="number" id="obj_cat_total" class="form-control" value="0" placeholder="Current Category Total"> 
+              </div>
+              <div class="form-group list-group-item">
+               <label>Target Facings (%)</label>
+               <input type="number" id="obj_tgt_fac" class="form-control" value="0" placeholder="Target Facings"> 
+              </div>  
+              <div class="form-group list-group-item">
+               <label>Current Facings</label>
+               <input type="number" id="obj_curr_facings" class="form-control" value="0" placeholder="current Facings">
+              </div>   
+              <div class="form-group list-group-item">
+                <label>Current Percentage (%)</label>
+               <input type="number" id="obj_curr_perc" class="form-control" value="0" placeholder="Current %age">
+              </div> 
+            </div> <!-- end group-->  
+            <div class="agree-group" style="display:none;">
+              <div class="form-group list-group-item">
+                <label>Did you achieve the objective</label>
+                <select name="obj_yes_no" id="obj_yes_no" class="form-control">
+                  <option value="Yes">Yes</option>
+                  <option value="No">No</option>
+                </select>
+              </div>
+              <div class="form-group list-group-item">
+                <label>If No, Why</label>
+                <textarea id="obj_ifnowhy" class="form-control" placeholder="Explain why you did not achieve this objective" cols="30" rows="5"></textarea>
+              </div>
+            </div>   <!-- end group-->    
+            <div class="form-group list-group-item">
+             <label>Action Point</label>
+             <textarea id="obj_action" class="form-control" placeholder="Action Point" cols="30" rows="5"></textarea>
+            </div>
+            <div class="form-group list-group-item">
+             <button class="btn btn-primary btn-block" type="submit" id="objSubmit">Save</button>
+            </div>
+          </form>           
+        </div>
+        <div class="alert alert-success alert-dismissible hidden" role="alert" id="FormNotification"><p><span class="glyphicon glyphicon-ok"></span> Item Successfully Saved</p></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- end modal -->
+<footer></footer>
+</div>
+<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
+<script type="text/javascript" src="js/lenovo.js"></script>
+<script type="text/javascript" src="js/storage.js"></script>
+<script type="text/javascript" src="js/functions.js"></script>
+<script type="text/javascript" src="js/objectives.js"></script>
+<script type="text/javascript" src="icomoon/liga.js"></script>
+</body>
+</html>
