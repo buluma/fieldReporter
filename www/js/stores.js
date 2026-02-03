@@ -13,6 +13,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formNotification = document.getElementById('FormNotification');
     const dataList = document.querySelector('.dataList');
     const modalTitle = document.getElementById('myModalLabel');
+    const deleteStoreBtn = document.getElementById('deleteStoreBtn'); // Get the new delete button
 
     // Modal control functions
     function showModal() {
@@ -25,6 +26,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         formModal.style.display = 'none';
         formModal.classList.remove('in');
         document.body.classList.remove('modal-open');
+        resetForm(); // Reset form when modal is hidden
     }
 
     // Reset form fields and edit state
@@ -35,6 +37,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         modalTitle.textContent = 'New Outlet'; // Reset modal title
         storeSubmitBtn.textContent = 'Save'; // Reset submit button text
         formNotification.classList.remove('alert-danger'); // Remove error styling
+        deleteStoreBtn.classList.add('hidden'); // Hide delete button by default
     }
 
     // Load and display stores
@@ -53,9 +56,6 @@ document.addEventListener('DOMContentLoaded', async () => {
                     storeCard.innerHTML = `
                         <div class="store-card-icon"></div>
                         <h4>${store.name}</h4>
-                        <div class="store-actions">
-                            <button class="btn btn-default delete-store" data-id="${store.id}">Delete</button>
-                        </div>
                     `;
                     // Attach click listener to the card itself for editing
                     storeCard.addEventListener('click', async (event) => {
@@ -68,17 +68,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                     dataList.appendChild(storeCard);
                 });
 
-                // Add event listeners for delete buttons
-                document.querySelectorAll('.delete-store').forEach(button => {
-                    button.addEventListener('click', async (event) => {
-                        event.stopPropagation(); // Prevent card click from triggering
-                        const storeId = parseInt(event.target.dataset.id);
-                        if (confirm('Are you sure you want to delete this store?')) {
-                            await deleteStore(storeId);
-                            loadStores(); // Refresh list
-                        }
-                    });
-                });
+
             }
         } catch (error) {
             console.error('Error loading stores:', error);
@@ -106,6 +96,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 modalTitle.textContent = 'Edit Outlet'; // Change modal title
                 storeSubmitBtn.textContent = 'Update'; // Change submit button text
                 formNotification.classList.add('hidden'); // Hide any previous notification
+                deleteStoreBtn.classList.remove('hidden'); // Show delete button
 
                 showModal();
             }
@@ -165,8 +156,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     formstore.addEventListener('submit', saveStore);
 
-    formModal.querySelector('.close').addEventListener('click', hideModal);
-    formModal.querySelector('[data-dismiss="modal"]').addEventListener('click', hideModal);
     formModal.addEventListener('click', (event) => {
         if (event.target === formModal) { // Click outside the modal content
             hideModal();
