@@ -3,8 +3,10 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: #E4E4E4;
-    background-image: linear-gradient(to bottom, #A7A7A7 0%, #E4E4E4 51%);
+    background-image: url('../img/bg.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
 }
 
 .login-box {
@@ -85,19 +87,19 @@ button:hover {
     .login-container {
         background-image: linear-gradient(to bottom, #585858 0%, #1B1B1B 51%);
     }
-    
+
     .login-box {
-        background-color: #333;
+        background-color: #33333382;
     }
-    
+
     .login-box h1, .login-box h2 {
         color: #fff;
     }
-    
+
     .input-group label {
         color: #ddd;
     }
-    
+
     .input-group input {
         background-color: #555;
         color: white;

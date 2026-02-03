@@ -209,9 +209,9 @@ function logout() {
 }
 
 /**
- * Log a successful login attempt
+ * Log a login/logout event
  */
-async function logSuccessfulLogin(userId, username) {
+async function addLoginLog(eventType, userId, username) {
     if (!db) {
         throw new Error('Database not initialized');
     }
@@ -219,26 +219,33 @@ async function logSuccessfulLogin(userId, username) {
     const transaction = db.transaction([LOGIN_LOG_STORE], 'readwrite');
     const objectStore = transaction.objectStore(LOGIN_LOG_STORE);
 
-    const loginRecord = {
+    const logRecord = {
         userId: userId,
         username: username,
         timestamp: new Date().toISOString(),
-        eventType: 'login'
+        eventType: eventType
     };
 
     return new Promise((resolve, reject) => {
-        const request = objectStore.add(loginRecord);
+        const request = objectStore.add(logRecord);
 
         request.onsuccess = () => {
-            console.log('Login logged successfully');
+            console.log(`Event '${eventType}' logged successfully`);
             resolve(request.result);
         };
 
         request.onerror = () => {
-            console.error('Error logging login:', request.error);
+            console.error(`Error logging event '${eventType}':`, request.error);
             reject(request.error);
         };
     });
+}
+
+/**
+ * Log a successful login attempt
+ */
+async function logSuccessfulLogin(userId, username) {
+    return addLoginLog('login', userId, username);
 }
 
 /**
