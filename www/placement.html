@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/stores.css">
+    <title>Placement Status - Field Reporter</title>
+</head>
+<body>
+    <div class="app">
+        <div class="sticky-header">
+            <!-- Top navigation bar -->
+            <div class="top-bar">
+                <span class="title">GBC - Stock Monitoring 2.0</span>
+                <div id="logoutBtn" class="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="top-nav">
+                <div class="nav-tabs">
+                    <a href="index.html" class="nav-tab">Home</a>
+                    <a href="stores.html" class="nav-tab">All Outlets</a>
+                    <a href="my_stores.html" class="nav-tab">My Outlets</a>
+                    <a href="#" class="nav-tab">Data Sync</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="scrollable-content">
+            <div class="store-nav-container" style="padding: 10px;">
+                <button id="backToStoreBtn" class="btn btn-default">Back to Store</button>
+            </div>
+
+            <div id="content" class="main-content">
+                <div class="header-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="pageTitle" style="margin: 0;">Placement Status</h3>
+                    <button id="addPlacementBtn" type="button" class="btn btn-primary">Add New</button>
+                </div>
+
+                <article id="placementList">
+                    <div class="list-group dataList">
+                        <!-- Placement items will be listed here -->
+                    </div>
+                </article>
+
+                <!-- Modal for adding placement -->
+                <div class="modal fade" id="form-modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">New Placement Record</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="list-group">
+                                    <form id="form_placement">
+                                        <div class="form-group list-group-item">
+                                            <label>Were you able to sell in William Lawson 1L?</label>
+                                            <select id="sell_wl_1l" class="form-control" required>
+                                                <option value="">Select</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group list-group-item">
+                                            <label>Were you able to sell in William Lawson 35cl?</label>
+                                            <select id="sell_wl_35cl" class="form-control" required>
+                                                <option value="">Select</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="form-group list-group-item">
+                                            <label>Were you able to sell in William Lawson 75cl?</label>
+                                            <select id="sell_wl_75cl" class="form-control" required>
+                                                <option value="">Select</option>
+                                                <option value="Yes">Yes</option>
+                                                <option value="No">No</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <button class="btn btn-primary btn-block" type="submit" id="submitBtn">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div class="alert alert-success alert-dismissible hidden" role="alert" id="FormNotification">
+                                    <p>Item Successfully Saved</p>
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" id="closeModalBtn">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="cordova.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/placement.js"></script>
+</body>
+</html>

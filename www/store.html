@@ -38,20 +38,31 @@
 
         <div class="scrollable-content">
             <div id="content" class="main-content">
-                <div class="store-details-container" style="padding: 15px;">
-                    <button id="backToMyStoresBtn" class="btn btn-default" style="margin-bottom: 15px;">Back to My Outlets</button>
-                    <h2 id="storeName" style="margin-top: 0;">Store Name</h2>
-                    <div class="details-card">
-                        <p><strong>Region:</strong> <span id="storeRegion"></span></p>
-                        <p><strong>Location:</strong> <span id="storeLocation"></span></p>
-                        <p><strong>Address:</strong> <span id="storeAddress"></span></p>
-                        <p><strong>Phone:</strong> <span id="storePhone"></span></p>
-                        <p><strong>Email:</strong> <span id="storeEmail"></span></p>
-                        <p><strong>Contact Person:</strong> <span id="storeContactPerson"></span></p>
-                        <p><strong>Notes:</strong> <span id="storeNotes"></span></p>
-                        <p><strong>Associated User:</strong> <span id="storeAssociatedUser"></span></p>
-                        <p><strong>Latitude:</strong> <span id="storeLatitude"></span></p>
-                        <p><strong>Longitude:</strong> <span id="storeLongitude"></span></p>
+                <div class="store-nav-container" style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
+                    <button id="backToMyStoresBtn" class="btn btn-default">Back</button>
+                    <div id="checkinAction">
+                        <!-- Check-in/out button will be here -->
+                    </div>
+                </div>
+
+                <div id="checkinWarning" class="alert alert-warning hidden">
+                    Please Check In to start adding data.
+                </div>
+
+                <div id="quickInputHeader" class="quick-input-header">
+                    <h4>Quick Input Menu</h4>
+                </div>
+
+                <div id="storeMenu" class="store-grid-menu">
+                    <!-- Menu items will be populated here -->
+                </div>
+
+                <hr>
+
+                <div class="store-details-container" style="padding: 0 15px;">
+                    <h3 id="storeName" style="margin-top: 0;">Store Name</h3>
+                    <div id="storeInfo" class="list-group">
+                        <!-- Store info will be populated here -->
                     </div>
                 </div>
             </div>

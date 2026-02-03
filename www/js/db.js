@@ -1,9 +1,14 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 5; // Incremented to allow for schema changes
+const DB_VERSION = 10; // Incremented for visibility table
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
+const CHECKIN_STORE = 'shop_checkin'; // New store for check-ins
+const AVAILABILITY_STORE = 'availability'; // New store for availability status
+const PLACEMENT_STORE = 'placement'; // New store for placement status
+const ACTIVATION_STORE = 'activation'; // New store for activation status
+const VISIBILITY_STORE = 'visibility'; // New store for visibility status
 
 let db;
 
@@ -79,6 +84,47 @@ function initDB() {
                 storesStore.createIndex('latitude', 'latitude', { unique: false }); // New index for latitude
                 storesStore.createIndex('longitude', 'longitude', { unique: false }); // New index for longitude
                 console.log('Stores store created');
+            }
+
+            // Create shop_checkin object store if it doesn't exist
+            if (!db.objectStoreNames.contains(CHECKIN_STORE)) {
+                const checkinStore = db.createObjectStore(CHECKIN_STORE, { keyPath: 'id', autoIncrement: true });
+                checkinStore.createIndex('store_id', 'store_id', { unique: false });
+                checkinStore.createIndex('session_id', 'session_id', { unique: true });
+                checkinStore.createIndex('checkout_time', 'checkout_time', { unique: false });
+                console.log('Shop checkin store created');
+            }
+
+            // Create availability object store if it doesn't exist
+            if (!db.objectStoreNames.contains(AVAILABILITY_STORE)) {
+                const availabilityStore = db.createObjectStore(AVAILABILITY_STORE, { keyPath: 'id', autoIncrement: true });
+                availabilityStore.createIndex('store_id', 'store_id', { unique: false });
+                availabilityStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Availability store created');
+            }
+
+            // Create placement object store if it doesn't exist
+            if (!db.objectStoreNames.contains(PLACEMENT_STORE)) {
+                const placementStore = db.createObjectStore(PLACEMENT_STORE, { keyPath: 'id', autoIncrement: true });
+                placementStore.createIndex('store_id', 'store_id', { unique: false });
+                placementStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Placement store created');
+            }
+
+            // Create activation object store if it doesn't exist
+            if (!db.objectStoreNames.contains(ACTIVATION_STORE)) {
+                const activationStore = db.createObjectStore(ACTIVATION_STORE, { keyPath: 'id', autoIncrement: true });
+                activationStore.createIndex('store_id', 'store_id', { unique: false });
+                activationStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Activation store created');
+            }
+
+            // Create visibility object store if it doesn't exist
+            if (!db.objectStoreNames.contains(VISIBILITY_STORE)) {
+                const visibilityStore = db.createObjectStore(VISIBILITY_STORE, { keyPath: 'id', autoIncrement: true });
+                visibilityStore.createIndex('store_id', 'store_id', { unique: false });
+                visibilityStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Visibility store created');
             }
         };
     });
@@ -488,6 +534,223 @@ async function deleteStore(id) {
             console.error('Error deleting store:', request.error);
             reject(request.error);
         };
+    });
+}
+
+/**
+ * Check in a user to a store
+ */
+async function checkInUser(checkinData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([CHECKIN_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(CHECKIN_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...checkinData,
+            checkout_time: 'none',
+            created: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Check out a user from a store
+ */
+async function checkOutUser(storeId, sessionId, checkoutData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([CHECKIN_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(CHECKIN_STORE);
+    const index = objectStore.index('session_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.get(sessionId);
+        request.onsuccess = () => {
+            const data = request.result;
+            if (data) {
+                data.checkout_time = new Date().toISOString();
+                data.checkout_place = checkoutData.checkout_place;
+                const updateRequest = objectStore.put(data);
+                updateRequest.onsuccess = () => resolve();
+                updateRequest.onerror = () => reject(updateRequest.error);
+            } else {
+                reject(new Error('Checkin session not found'));
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get active checkin for a store
+ */
+async function getActiveCheckin(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([CHECKIN_STORE], 'readonly');
+    const objectStore = transaction.objectStore(CHECKIN_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.openCursor(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+                if (cursor.value.checkout_time === 'none') {
+                    resolve(cursor.value);
+                } else {
+                    cursor.continue();
+                }
+            } else {
+                resolve(null);
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add availability record
+ */
+async function addAvailability(availabilityData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([AVAILABILITY_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(AVAILABILITY_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...availabilityData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get availability records for a store
+ */
+async function getAvailabilityByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([AVAILABILITY_STORE], 'readonly');
+    const objectStore = transaction.objectStore(AVAILABILITY_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            // Sort by created_on DESC manually as IndexedDB getAll doesn't support sorting
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add placement record
+ */
+async function addPlacement(placementData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([PLACEMENT_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(PLACEMENT_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...placementData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get placement records for a store
+ */
+async function getPlacementByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([PLACEMENT_STORE], 'readonly');
+    const objectStore = transaction.objectStore(PLACEMENT_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add activation record
+ */
+async function addActivation(activationData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([ACTIVATION_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(ACTIVATION_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...activationData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get activation records for a store
+ */
+async function getActivationByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([ACTIVATION_STORE], 'readonly');
+    const objectStore = transaction.objectStore(ACTIVATION_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add visibility record
+ */
+async function addVisibility(visibilityData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([VISIBILITY_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(VISIBILITY_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...visibilityData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get visibility records for a store
+ */
+async function getVisibilityByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([VISIBILITY_STORE], 'readonly');
+    const objectStore = transaction.objectStore(VISIBILITY_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
     });
 }
 

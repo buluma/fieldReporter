@@ -3,17 +3,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     const storeId = new URLSearchParams(window.location.search).get('id');
     const storeNameElement = document.getElementById('storeName');
-    const storeRegionElement = document.getElementById('storeRegion');
-    const storeLocationElement = document.getElementById('storeLocation');
-    const storeAddressElement = document.getElementById('storeAddress');
-    const storePhoneElement = document.getElementById('storePhone');
-    const storeEmailElement = document.getElementById('storeEmail');
-    const storeContactPersonElement = document.getElementById('storeContactPerson');
-    const storeNotesElement = document.getElementById('storeNotes');
-    const storeAssociatedUserElement = document.getElementById('storeAssociatedUser');
-    const storeLatitudeElement = document.getElementById('storeLatitude');
-    const storeLongitudeElement = document.getElementById('storeLongitude');
+    const storeInfoElement = document.getElementById('storeInfo');
+    const storeMenuElement = document.getElementById('storeMenu');
+    const checkinActionElement = document.getElementById('checkinAction');
+    const checkinWarningElement = document.getElementById('checkinWarning');
     const backToMyStoresBtn = document.getElementById('backToMyStoresBtn');
+
+    let currentStore = null;
+    let activeCheckin = null;
 
     backToMyStoresBtn.addEventListener('click', () => {
         window.location.href = 'my_stores.html';
@@ -24,33 +21,127 @@ document.addEventListener('DOMContentLoaded', async () => {
         return;
     }
 
-    try {
-        const store = await getStoreById(parseInt(storeId));
-        if (store) {
-            storeNameElement.textContent = store.name;
-            storeRegionElement.textContent = store.region || 'N/A';
-            storeLocationElement.textContent = store.location || 'N/A';
-            storeAddressElement.textContent = store.address || 'N/A';
-            storePhoneElement.textContent = store.phone || 'N/A';
-            storeEmailElement.textContent = store.email || 'N/A';
-            storeContactPersonElement.textContent = store.contactperson || 'N/A';
-            storeNotesElement.textContent = store.notes || 'N/A';
-            storeLatitudeElement.textContent = store.latitude || 'N/A';
-            storeLongitudeElement.textContent = store.longitude || 'N/A';
-
-            // Fetch user data
-            if (store.userId) {
-                const user = await getUserById(store.userId);
-                storeAssociatedUserElement.textContent = user ? user.username : 'Unknown User';
+    async function loadStoreData() {
+        try {
+            currentStore = await getStoreById(parseInt(storeId));
+            if (currentStore) {
+                storeNameElement.textContent = currentStore.name;
+                populateStoreInfo(currentStore);
+                await checkCheckinStatus();
             } else {
-                storeAssociatedUserElement.textContent = 'N/A';
+                storeNameElement.textContent = 'Store not found.';
             }
-
-        } else {
-            storeNameElement.textContent = 'Store not found.';
+        } catch (error) {
+            console.error('Error loading store details:', error);
+            storeNameElement.textContent = `Error loading store details: ${error.message}`;
         }
-    } catch (error) {
-        console.error('Error loading store details:', error);
-        storeNameElement.textContent = `Error loading store details: ${error.message}`;
     }
+
+    async function checkCheckinStatus() {
+        activeCheckin = await getActiveCheckin(storeId);
+        if (activeCheckin) {
+            // User is checked in
+            checkinActionElement.innerHTML = '<button id="checkoutBtn" class="btn btn-danger">Check Out</button>';
+            checkinWarningElement.classList.add('hidden');
+            storeMenuElement.classList.remove('hidden');
+            populateMenu();
+            
+            document.getElementById('checkoutBtn').addEventListener('click', handleCheckOut);
+        } else {
+            // User is not checked in
+            checkinActionElement.innerHTML = '<button id="checkinBtn" class="btn btn-success">Check In</button>';
+            checkinWarningElement.classList.remove('hidden');
+            storeMenuElement.classList.add('hidden');
+            storeMenuElement.innerHTML = '';
+            
+            document.getElementById('checkinBtn').addEventListener('click', handleCheckIn);
+        }
+    }
+
+    async function handleCheckIn() {
+        try {
+            const currentUser = getCurrentUser();
+            const location = await getUserLocation();
+            const checkinData = {
+                store_id: parseInt(storeId),
+                session_id: Date.now().toString(),
+                checkin_time: new Date().toISOString(),
+                checkin_place: `${location.latitude},${location.longitude}`,
+                submitter: currentUser ? currentUser.username : 'Unknown',
+                store: currentStore.name,
+                day: new Date().toISOString().split('T')[0]
+            };
+            await checkInUser(checkinData);
+            await checkCheckinStatus();
+        } catch (error) {
+            alert('Error checking in: ' + error.message);
+        }
+    }
+
+    async function handleCheckOut() {
+        try {
+            const location = await getUserLocation();
+            const checkoutData = {
+                checkout_place: `${location.latitude},${location.longitude}`
+            };
+            await checkOutUser(storeId, activeCheckin.session_id, checkoutData);
+            await checkCheckinStatus();
+        } catch (error) {
+            alert('Error checking out: ' + error.message);
+        }
+    }
+
+    function populateStoreInfo(store) {
+        let html = `
+            <div class="list-group-item">
+                <p>Region</p>
+                <p class="bold">${store.region || 'N/A'}</p>
+            </div>
+            <div class="list-group-item">
+                <p>Location</p>
+                <p class="bold">${store.location || 'N/A'}</p>
+            </div>
+            <div class="list-group-item">
+                <p>Address</p>
+                <p class="bold">${store.address || 'N/A'}</p>
+            </div>
+            <div class="list-group-item">
+                <p>Phone</p>
+                <p class="bold">${store.phone || 'N/A'}</p>
+            </div>
+            <div class="list-group-item">
+                <p>Contact Person</p>
+                <p class="bold">${store.contactperson || 'N/A'}</p>
+            </div>
+            <div class="list-group-item">
+                <p>Remarks</p>
+                <p>${store.notes || 'N/A'}</p>
+            </div>
+        `;
+        storeInfoElement.innerHTML = html;
+    }
+
+    function populateMenu() {
+        const menuItems = [
+            { name: 'Availability', icon: '📋', link: 'availability.html' },
+            { name: 'Placement', icon: '📂', link: 'placement.html' },
+            { name: 'Visibility', icon: '👁️', link: 'visibility.html' },
+            { name: 'Activation', icon: '📊', link: 'activation.html' }
+        ];
+
+        let html = '';
+        menuItems.forEach(item => {
+            html += `
+                <a href="${item.link}?store_id=${storeId}&store_name=${encodeURIComponent(currentStore.name)}" class="store-menu-item">
+                    <div class="btn btn-default btn-block">
+                        <span class="big-icon">${item.icon}</span>
+                        <h4>${item.name}</h4>
+                    </div>
+                </a>
+            `;
+        });
+        storeMenuElement.innerHTML = html;
+    }
+
+    await loadStoreData();
 });
