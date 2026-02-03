@@ -34,17 +34,22 @@
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
         <link rel="stylesheet" href="css/index.css">
-        <title>Hello World</title>
+        <title>Field Reporter</title>
     </head>
     <body>
         <div class="app">
-            <h1>Apache Cordova</h1>
+            <h1>Field Reporter</h1>
             <div id="deviceready" class="blink">
                 <p class="event listening">Connecting to Device</p>
                 <p class="event received">Device is Ready</p>
             </div>
+            <div id="userInfo" class="user-info" style="display: none;">
+                <p>Welcome, <span id="usernameDisplay"></span>!</p>
+                <button id="logoutBtn" class="logout-btn">Logout</button>
+            </div>
         </div>
         <script src="cordova.js"></script>
+        <script src="js/db.js"></script>
         <script src="js/index.js"></script>
     </body>
 </html>

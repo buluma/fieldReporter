@@ -21,9 +21,55 @@
 // See https://cordova.apache.org/docs/en/latest/cordova/events/events.html#deviceready
 document.addEventListener('deviceready', onDeviceReady, false);
 
+// Check authentication on page load
+document.addEventListener('DOMContentLoaded', checkAuthStatus);
+
 function onDeviceReady() {
     // Cordova is now initialized. Have fun!
-
     console.log('Running cordova-' + cordova.platformId + '@' + cordova.version);
     document.getElementById('deviceready').classList.add('ready');
+
+    // Initialize database and check authentication
+    initDB()
+        .then(() => {
+            console.log('Database initialized');
+            checkAuthStatus();
+        })
+        .catch(error => {
+            console.error('Failed to initialize database:', error);
+        });
+}
+
+// Check if user is authenticated, redirect to login if not
+function checkAuthStatus() {
+    // If not logged in, redirect to login page
+    if (!isLoggedIn()) {
+        console.log('User not authenticated, redirecting to login...');
+        window.location.href = 'login.html';
+    } else {
+        // Show user info
+        showUserInfo();
+        setupLogoutHandler();
+    }
+}
+
+// Display user information
+function showUserInfo() {
+    const currentUser = getCurrentUser();
+    if (currentUser) {
+        document.getElementById('usernameDisplay').textContent = currentUser.username;
+        document.getElementById('userInfo').style.display = 'block';
+    }
+}
+
+// Set up logout button handler
+function setupLogoutHandler() {
+    const logoutBtn = document.getElementById('logoutBtn');
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', function() {
+            logout();
+            console.log('User logged out, redirecting to login...');
+            window.location.href = 'login.html';
+        });
+    }
 }

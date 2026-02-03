@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>Test Setup - Field Reporter</title>
+</head>
+<body>
+    <h1>Test Setup</h1>
+    <p>This page will help set up a test user for the Field Reporter app.</p>
+    <button id="createTestUser">Create Test User</button>
+    <div id="status"></div>
+
+    <script src="js/db.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('createTestUser').addEventListener('click', async function() {
+                const statusDiv = document.getElementById('status');
+                statusDiv.innerHTML = 'Creating test user...';
+                
+                try {
+                    // Wait for database to be initialized
+                    await initDB();
+                    
+                    // Create a test user
+                    const testUserData = {
+                        username: 'testuser',
+                        password: 'password123',
+                        email: 'test@example.com'
+                    };
+                    
+                    await addUser(testUserData);
+                    statusDiv.innerHTML = 'Test user created successfully!';
+                } catch (error) {
+                    console.error('Error creating test user:', error);
+                    statusDiv.innerHTML = 'Error creating test user: ' + error.message;
+                }
+            });
+        });
+    </script>
+</body>
+</html>
