@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 11; // Incremented to force upgrade for missing stores
+const DB_VERSION = 12; // Incremented for user 'assigned' field and update functionality
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -41,7 +41,8 @@ function initDB() {
                         const defaultUser = {
                             username: 'admin',
                             password: 'admin123',
-                            email: 'admin@fieldreporter.local'
+                            email: 'admin@fieldreporter.local',
+                            assigned: 'team-leader' // Default admin is a team leader
                         };
 
                         await addUser(defaultUser);
@@ -63,6 +64,7 @@ function initDB() {
                 const objectStore = db.createObjectStore(USERS_STORE, { keyPath: 'id', autoIncrement: true });
                 objectStore.createIndex('username', 'username', { unique: true });
                 objectStore.createIndex('email', 'email', { unique: false });
+                objectStore.createIndex('assigned', 'assigned', { unique: false }); // New index for role
                 console.log('Users store created');
             }
 
@@ -181,6 +183,54 @@ async function getUserById(id) {
 }
 
 /**
+ * Update an existing user in the database
+ */
+async function updateUser(id, userData) {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+    
+    const transaction = db.transaction([USERS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(USERS_STORE);
+    
+    return new Promise((resolve, reject) => {
+        // First get the existing user to preserve password if not changing
+        const getRequest = objectStore.get(id);
+        
+        getRequest.onsuccess = async () => {
+            const existingUser = getRequest.result;
+            if (!existingUser) {
+                reject(new Error('User not found'));
+                return;
+            }
+            
+            const updatedUser = { 
+                ...existingUser, 
+                ...userData,
+                id: id // Ensure ID is preserved
+            };
+            
+            // If password is being updated, hash it
+            if (userData.password) {
+                updatedUser.password = await hashPassword(userData.password);
+            }
+            
+            const putRequest = objectStore.put(updatedUser);
+            putRequest.onsuccess = () => {
+                console.log('User updated successfully');
+                resolve(putRequest.result);
+            };
+            putRequest.onerror = () => {
+                console.error('Error updating user:', putRequest.error);
+                reject(putRequest.error);
+            };
+        };
+        
+        getRequest.onerror = () => reject(getRequest.error);
+    });
+}
+
+/**
  * Add a new user to the database
  */
 async function addUser(userData) {
@@ -198,6 +248,7 @@ async function addUser(userData) {
         username: userData.username,
         email: userData.email || '',
         password: hashedPassword,
+        assigned: userData.assigned || 'field', // Default to 'field' if not provided
         createdAt: new Date().toISOString()
     };
     

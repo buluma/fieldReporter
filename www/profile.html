@@ -114,7 +114,10 @@
                 <div class="profile-container">
                     <div class="profile-header">
                         <h1>User Profile</h1>
-                        <a href="index.html" class="back-btn">Back to Home</a>
+                        <div>
+                            <button id="editProfileBtn" class="btn btn-primary" style="margin-right: 10px;">Edit Profile</button>
+                            <a href="index.html" class="back-btn" style="margin-bottom: 0;">Back to Home</a>
+                        </div>
                     </div>
                     
                     <div id="loading" class="loading">Loading profile information...</div>
@@ -136,6 +139,10 @@
                                     <div id="email" class="info-value">-</div>
                                 </div>
                                 <div class="info-item">
+                                    <div class="info-label">Assigned Role</div>
+                                    <div id="assigned" class="info-value">-</div>
+                                </div>
+                                <div class="info-item">
                                     <div class="info-label">Account Created</div>
                                     <div id="accountCreated" class="info-value">-</div>
                                 </div>
@@ -146,6 +153,49 @@
                             <h3>Recent Login Activity</h3>
                             <div id="recentLogins">
                                 <p>Loading recent login activity...</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Modal for editing profile -->
+                    <div class="modal fade" id="edit-profile-modal" tabindex="-1" role="dialog" style="display: none;">
+                        <div class="modal-dialog" role="document">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h4 class="modal-title">Edit Profile</h4>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="editProfileForm">
+                                        <div class="form-group list-group-item">
+                                            <label for="editUsername">Username</label>
+                                            <input type="text" id="editUsername" class="form-control" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label for="editEmail">Email</label>
+                                            <input type="email" id="editEmail" class="form-control" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label for="editAssigned">Assigned Role</label>
+                                            <select id="editAssigned" class="form-control" required>
+                                                <option value="field">Field Staff</option>
+                                                <option value="team-leader">Team Leader</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label for="editPassword">New Password (leave blank to keep current)</label>
+                                            <input type="password" id="editPassword" class="form-control">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                                        </div>
+                                    </form>
+                                    <div id="editNotification" class="alert alert-success hidden">
+                                        Profile updated successfully!
+                                    </div>
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-default" id="closeEditModalBtn">Close</button>
+                                </div>
                             </div>
                         </div>
                     </div>
