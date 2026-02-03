@@ -96,4 +96,13 @@ function setupLogoutHandler() {
             window.location.href = 'login-logs.html';
         });
     }
+
+    // Set up profile navigation button handler
+    const profileNavBtn = document.getElementById('profileNavBtn');
+    if (profileNavBtn) {
+        profileNavBtn.addEventListener('click', function() {
+            // Navigate to the profile page
+            window.location.href = 'profile.html';
+        });
+    }
 }
