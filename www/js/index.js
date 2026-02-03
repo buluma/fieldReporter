@@ -58,6 +58,12 @@ function showUserInfo() {
     const currentUser = getCurrentUser();
     if (currentUser) {
         document.getElementById('usernameDisplay').textContent = currentUser.username;
+
+        // Set current date
+        const today = new Date();
+        const dateString = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
+        document.getElementById('currentDate').textContent = dateString;
+
         document.getElementById('userInfo').style.display = 'block';
     }
 }
@@ -77,6 +83,15 @@ function setupLogoutHandler() {
     const viewLogsBtn = document.getElementById('viewLogsBtn');
     if (viewLogsBtn) {
         viewLogsBtn.addEventListener('click', function() {
+            // Navigate to the login logs page
+            window.location.href = 'login-logs.html';
+        });
+    }
+
+    // Set up login activity card handler
+    const loginActivityCard = document.getElementById('loginActivityCard');
+    if (loginActivityCard) {
+        loginActivityCard.addEventListener('click', function() {
             // Navigate to the login logs page
             window.location.href = 'login-logs.html';
         });
