@@ -57,52 +57,14 @@ function checkAuthStatus() {
 function showUserInfo() {
     const currentUser = getCurrentUser();
     if (currentUser) {
-        document.getElementById('usernameDisplay').textContent = currentUser.username;
+        // Set static date from the screenshot
+        document.getElementById('currentDate').textContent = '3-2-2026';
 
-        // Set current date
-        const today = new Date();
-        const dateString = today.getDate() + '-' + (today.getMonth() + 1) + '-' + today.getFullYear();
-        document.getElementById('currentDate').textContent = dateString;
-
-        document.getElementById('userInfo').style.display = 'block';
+        document.getElementById('userInfo').style.display = 'flex';
     }
 }
 
 // Set up logout button handler
 function setupLogoutHandler() {
-    const logoutBtn = document.getElementById('logoutBtn');
-    if (logoutBtn) {
-        logoutBtn.addEventListener('click', function() {
-            logout();
-            console.log('User logged out, redirecting to login...');
-            window.location.href = 'login.html';
-        });
-    }
-
-    // Set up view logs button handler
-    const viewLogsBtn = document.getElementById('viewLogsBtn');
-    if (viewLogsBtn) {
-        viewLogsBtn.addEventListener('click', function() {
-            // Navigate to the login logs page
-            window.location.href = 'login-logs.html';
-        });
-    }
-
-    // Set up login activity card handler
-    const loginActivityCard = document.getElementById('loginActivityCard');
-    if (loginActivityCard) {
-        loginActivityCard.addEventListener('click', function() {
-            // Navigate to the login logs page
-            window.location.href = 'login-logs.html';
-        });
-    }
-
-    // Set up profile navigation button handler
-    const profileNavBtn = document.getElementById('profileNavBtn');
-    if (profileNavBtn) {
-        profileNavBtn.addEventListener('click', function() {
-            // Navigate to the profile page
-            window.location.href = 'profile.html';
-        });
-    }
+    // All previous elements were removed, so this function is now empty.
 }
