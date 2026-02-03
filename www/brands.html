@@ -1,103 +1,128 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!--<meta http-equiv="Content-Security-Policy" content="default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *">-->
-  <meta name="format-detection" content="telephone=no">
-  <meta name="msapplication-tap-highlight" content="no">
-  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width">
-  <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap.min.css">       
-  <link rel="stylesheet" type="text/css" href="icomoon/icomoon.css">
-  <link rel="stylesheet" type="text/css" href="css/app.css">
-  <link rel="stylesheet" type="text/css" href="bootstrap/css/bootstrap-toggle.css">
-  <script type="text/javascript" src="js/userdata.js"></script>
-  <script type="text/javascript" src="cordova.js"></script>
-  <title>Brands</title>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/stores.css">
+    <title>Brand Stocks - Field Reporter</title>
 </head>
 <body>
-<div class="container m-scene" id="transition">
-<nav class="navbar navbar-default navbar-fixed-top">
-  <div class="container-fluid">
-    <div class="navbar-header pull-left">  </div>
-    <div class="pull-right">   </div>
-  </div>
-</nav>
-<div id="newsku"></div>
-<article id="skulist">
-<div class="pullRefresh align-center" style="display:none"><span class="glyphicon glyphicon-refresh"></span>Refreshing...</div>
-  <div class="list-group dataList">   </div>
-</article>
-<!-- Modal -->
-<div class="modal fade" id="form-modal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-  <div class="modal-dialog" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-        <h4 class="modal-title" id="myModalLabel">New Brand Stocks Input</h4>
-      </div>
-      <div class="modal-body">
-        <style>
-            /*label, input.form-control,select.form-control {width:50%;float:left;}*/
-            input.form-control,select.form-control {height: 25px;padding: 2px 12px;font-size: 11px;border-radius: 0;}
-            .list-group-item {padding: 5px 15px;overflow:visible;}
-        </style>
-        <!-- our data form -->
-        <div class="list-group">
-          <form name="formskuinput" id="formskuinput" action="">
-            <div class="form-group list-group-item" id="selectbrands"></div> 
-            <div class="form-group list-group-item">
-             <label>Stock Date</label>
-             <input type="text" id="brand_stockdate" class="form-control" disabled> 
+    <div class="app">
+        <div class="sticky-header">
+            <!-- Top navigation bar -->
+            <div class="top-bar">
+                <span class="title">GBC - Stock Monitoring 2.0</span>
+                <div id="logoutBtn" class="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </div>
             </div>
-            <div class="form-group list-group-item">
-             <label>Current Stock</label>
-             <input type="number" id="brand_stock" class="form-control" value="0" placeholder="Current Stock"> 
-            </div>    
-            <div class="form-group list-group-item">
-             <label>Sale</label>
-             <input type="number" id="brand_sale" class="form-control" value="0" placeholder="Sale"> 
-            </div>  
-            <div class="form-group list-group-item">
-              <label>Order Placed</label>
-             <input type="number" id="brand_order" class="form-control" value="0" placeholder="How many were ordered">
+
+            <div class="top-nav">
+                <div class="nav-tabs">
+                    <a href="index.html" class="nav-tab">Home</a>
+                    <a href="stores.html" class="nav-tab">All Outlets</a>
+                    <a href="my_stores.html" class="nav-tab">My Outlets</a>
+                    <a href="#" class="nav-tab">Data Sync</a>
+                </div>
             </div>
-            <div class="form-group list-group-item">
-             <label>Delivered</label>
-             <input type="number" id="brand_delivery" class="form-control" value="0" placeholder="How many have been delivered">
-            </div>
-            <div class="form-group list-group-item">
-             <label class="checkbox">Stock Out</label>
-                <input id="brand_stockout" data-on="Yes" data-off="No" data-onstyle="success" data-offstyle="danger" type="checkbox">
-            </div>
-            <div class="form-group list-group-item">
-             <label>Remarks</label>
-             <textarea id="brand_remarks" class="form-control" placeholder="Remarks" cols="30" rows="5"></textarea>
-            </div>
-            <div class="form-group list-group-item">
-             <button class="btn btn-primary btn-block" type="submit" id="skuSubmit">Save</button>
-            </div>
-          </form>           
         </div>
-        <div class="alert alert-success alert-dismissible hidden" role="alert" id="FormNotification"><p><span class="glyphicon glyphicon-ok"></span> Item Successfully Saved</p></div>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-      </div>
+
+        <div class="scrollable-content">
+            <div class="store-nav-container" style="padding: 10px;">
+                <button id="backToStoreBtn" class="btn btn-default">Back to Store</button>
+            </div>
+
+            <div id="content" class="main-content">
+                <div class="header-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h3 id="pageTitle" style="margin: 0;">Brand Stocks</h3>
+                    <button id="addStockBtn" type="button" class="btn btn-primary">Add New</button>
+                </div>
+
+                <article id="stockList">
+                    <div class="list-group dataList">
+                        <!-- Stock items will be populated here -->
+                    </div>
+                </article>
+
+                <!-- Modal for adding stock -->
+                <div class="modal fade" id="form-modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">New Brand Stocks Input</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="list-group">
+                                    <form id="form_stock">
+                                        <div class="form-group list-group-item">
+                                            <label>Product</label>
+                                            <select id="brands" class="form-control" required>
+                                                <option value="">Select Brand</option>
+                                                <!-- Populated by JS -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Stock Date</label>
+                                            <input type="date" id="brand_stockdate" class="form-control" required> 
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Current Stock</label>
+                                            <input type="number" id="brand_stock" class="form-control" value="0" required> 
+                                        </div>    
+                                        <div class="form-group list-group-item">
+                                            <label>Sale</label>
+                                            <input type="number" id="brand_sale" class="form-control" value="0" required> 
+                                        </div>  
+                                        <div class="form-group list-group-item">
+                                            <label>Order Placed</label>
+                                            <input type="number" id="brand_order" class="form-control" value="0" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Delivered</label>
+                                            <input type="number" id="brand_delivery" class="form-control" value="0" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Stock Out</label>
+                                            <select id="brand_stockout" class="form-control" required>
+                                                <option value="No">No</option>
+                                                <option value="Yes">Yes</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Remarks</label>
+                                            <textarea id="brand_remarks" class="form-control" placeholder="Remarks" cols="30" rows="3"></textarea>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <button class="btn btn-primary btn-block" type="submit" id="submitBtn">Save</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div id="formNotification" class="alert alert-success hidden">
+                                    Item Successfully Saved
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-default" id="closeModalBtn">Close</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-  </div>
-</div>
-<!-- end modal -->
-<footer></footer>
-</div>
-<script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
-<script type="text/javascript" src="bootstrap/js/bootstrap.min.js"></script>
-<script type="text/javascript" src="js/moment.js"></script>
-<script type="text/javascript" src="bootstrap/js/bootstrap-toggle.js"></script>
-<script type="text/javascript" src="js/bootstrap-datetimepicker.js"></script>
-<!--<script type="text/javascript" src="js/jquery.smoothState.min.js"></script>-->
-<script type="text/javascript" src="js/storage.js"></script>
-<script type="text/javascript" src="js/functions.js"></script>
-<script type="text/javascript" src="js/brands.js"></script>
-<!--<script type="text/javascript" src="js/smooth.js"></script>-->
-<script type="text/javascript" src="icomoon/liga.js"></script>
+
+    <script src="cordova.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/brands.js"></script>
 </body>
 </html>

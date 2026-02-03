@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 15; // Incremented for Listings
+const DB_VERSION = 17; // Incremented to force upgrade for missing brand stores
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -14,6 +14,8 @@ const TL_OBJECTIVES_STORE = 'tl_objectives'; // New store for TL Objectives
 const OBJECTIVES_STORE = 'objectives'; // New store for Field Objectives
 const OTHER_OBJECTIVES_STORE = 'other_objectives'; // New store for Other Objectives
 const LISTINGS_STORE = 'listings'; // New store for Product Listings
+const BRANDS_STORE = 'brands'; // Master list of brands
+const BRAND_STOCKS_STORE = 'brand_stocks'; // Brand stock tracking
 
 let db;
 
@@ -58,120 +60,57 @@ function initDB() {
                 }
             };
 
+            // Seed brands if empty and store exists
+            if (db.objectStoreNames.contains(BRANDS_STORE)) {
+                const brandsTx = db.transaction([BRANDS_STORE], 'readwrite');
+                const brandsStore = brandsTx.objectStore(BRANDS_STORE);
+                const brandsCountReq = brandsStore.count();
+                brandsCountReq.onsuccess = async () => {
+                    if (brandsCountReq.result === 0) {
+                        console.log('Seeding brands...');
+                        const brands = [
+                            'KC Coconut', 'Chrome Lemon', 'Orijin AHS', 'McDowells', 
+                            'Tusker Gold', 'Smirnoff Ginsen', 'Chrome RTD', 
+                            'William Lawson 1L', 'William Lawson 75cl', 'William Lawson 35cl'
+                        ];
+                        for (const brand of brands) {
+                            brandsStore.add({ name: brand });
+                        }
+                    }
+                };
+            }
+
             resolve(db);
         };
 
         request.onupgradeneeded = (event) => {
             db = event.target.result;
+            const transaction = event.target.transaction;
 
-            // Create users object store if it doesn't exist
-            if (!db.objectStoreNames.contains(USERS_STORE)) {
-                const objectStore = db.createObjectStore(USERS_STORE, { keyPath: 'id', autoIncrement: true });
-                objectStore.createIndex('username', 'username', { unique: true });
-                objectStore.createIndex('email', 'email', { unique: false });
-                objectStore.createIndex('assigned', 'assigned', { unique: false }); // New index for role
-                console.log('Users store created');
+            // ... other stores ...
+            
+            // Create brands object store if it doesn't exist
+            if (!db.objectStoreNames.contains(BRANDS_STORE)) {
+                const brandsStore = db.createObjectStore(BRANDS_STORE, { keyPath: 'id', autoIncrement: true });
+                brandsStore.createIndex('name', 'name', { unique: true });
+                console.log('Brands store created');
+                
+                // Seed brands using the current transaction
+                const brands = [
+                    'KC Coconut', 'Chrome Lemon', 'Orijin AHS', 'McDowells', 
+                    'Tusker Gold', 'Smirnoff Ginsen', 'Chrome RTD', 
+                    'William Lawson 1L', 'William Lawson 75cl', 'William Lawson 35cl'
+                ];
+                brands.forEach(brand => {
+                    brandsStore.add({ name: brand });
+                });
             }
-
-            // Create login log object store if it doesn't exist
-            if (!db.objectStoreNames.contains(LOGIN_LOG_STORE)) {
-                const loginLogStore = db.createObjectStore(LOGIN_LOG_STORE, { keyPath: 'id', autoIncrement: true });
-                loginLogStore.createIndex('userId', 'userId', { unique: false });
-                loginLogStore.createIndex('username', 'username', { unique: false });
-                loginLogStore.createIndex('timestamp', 'timestamp', { unique: false });
-                console.log('Login log store created');
-            }
-
-            // Create stores object store if it doesn't exist
-            if (!db.objectStoreNames.contains(STORES_STORE)) {
-                const storesStore = db.createObjectStore(STORES_STORE, { keyPath: 'id', autoIncrement: true });
-                storesStore.createIndex('name', 'name', { unique: true });
-                storesStore.createIndex('region', 'region', { unique: false });
-                storesStore.createIndex('userId', 'userId', { unique: false }); // New index for associated user
-                storesStore.createIndex('latitude', 'latitude', { unique: false }); // New index for latitude
-                storesStore.createIndex('longitude', 'longitude', { unique: false }); // New index for longitude
-                console.log('Stores store created');
-            }
-
-            // Create shop_checkin object store if it doesn't exist
-            if (!db.objectStoreNames.contains(CHECKIN_STORE)) {
-                const checkinStore = db.createObjectStore(CHECKIN_STORE, { keyPath: 'id', autoIncrement: true });
-                checkinStore.createIndex('store_id', 'store_id', { unique: false });
-                checkinStore.createIndex('session_id', 'session_id', { unique: true });
-                checkinStore.createIndex('checkout_time', 'checkout_time', { unique: false });
-                console.log('Shop checkin store created');
-            }
-
-            // Create availability object store if it doesn't exist
-            if (!db.objectStoreNames.contains(AVAILABILITY_STORE)) {
-                const availabilityStore = db.createObjectStore(AVAILABILITY_STORE, { keyPath: 'id', autoIncrement: true });
-                availabilityStore.createIndex('store_id', 'store_id', { unique: false });
-                availabilityStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Availability store created');
-            }
-
-            // Create placement object store if it doesn't exist
-            if (!db.objectStoreNames.contains(PLACEMENT_STORE)) {
-                const placementStore = db.createObjectStore(PLACEMENT_STORE, { keyPath: 'id', autoIncrement: true });
-                placementStore.createIndex('store_id', 'store_id', { unique: false });
-                placementStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Placement store created');
-            }
-
-            // Create activation object store if it doesn't exist
-            if (!db.objectStoreNames.contains(ACTIVATION_STORE)) {
-                const activationStore = db.createObjectStore(ACTIVATION_STORE, { keyPath: 'id', autoIncrement: true });
-                activationStore.createIndex('store_id', 'store_id', { unique: false });
-                activationStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Activation store created');
-            }
-
-            // Create visibility object store if it doesn't exist
-            if (!db.objectStoreNames.contains(VISIBILITY_STORE)) {
-                const visibilityStore = db.createObjectStore(VISIBILITY_STORE, { keyPath: 'id', autoIncrement: true });
-                visibilityStore.createIndex('store_id', 'store_id', { unique: false });
-                visibilityStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Visibility store created');
-            }
-
-            // Create tl_focus object store if it doesn't exist
-            if (!db.objectStoreNames.contains(TL_FOCUS_STORE)) {
-                const tlFocusStore = db.createObjectStore(TL_FOCUS_STORE, { keyPath: 'id', autoIncrement: true });
-                tlFocusStore.createIndex('store_id', 'store_id', { unique: false });
-                tlFocusStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('TL Focus store created');
-            }
-
-            // Create tl_objectives object store if it doesn't exist
-            if (!db.objectStoreNames.contains(TL_OBJECTIVES_STORE)) {
-                const tlObjectivesStore = db.createObjectStore(TL_OBJECTIVES_STORE, { keyPath: 'id', autoIncrement: true });
-                tlObjectivesStore.createIndex('store_id', 'store_id', { unique: false });
-                tlObjectivesStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('TL Objectives store created');
-            }
-
-            // Create objectives object store if it doesn't exist
-            if (!db.objectStoreNames.contains(OBJECTIVES_STORE)) {
-                const objectivesStore = db.createObjectStore(OBJECTIVES_STORE, { keyPath: 'id', autoIncrement: true });
-                objectivesStore.createIndex('store_id', 'store_id', { unique: false });
-                objectivesStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Objectives store created');
-            }
-
-            // Create other_objectives object store if it doesn't exist
-            if (!db.objectStoreNames.contains(OTHER_OBJECTIVES_STORE)) {
-                const otherObjectivesStore = db.createObjectStore(OTHER_OBJECTIVES_STORE, { keyPath: 'id', autoIncrement: true });
-                otherObjectivesStore.createIndex('store_id', 'store_id', { unique: false });
-                otherObjectivesStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Other Objectives store created');
-            }
-
-            // Create listings object store if it doesn't exist
-            if (!db.objectStoreNames.contains(LISTINGS_STORE)) {
-                const listingsStore = db.createObjectStore(LISTINGS_STORE, { keyPath: 'id', autoIncrement: true });
-                listingsStore.createIndex('store_id', 'store_id', { unique: false });
-                listingsStore.createIndex('created_on', 'created_on', { unique: false });
-                console.log('Listings store created');
+            // Create brand_stocks object store if it doesn't exist
+            if (!db.objectStoreNames.contains(BRAND_STOCKS_STORE)) {
+                const brandStocksStore = db.createObjectStore(BRAND_STOCKS_STORE, { keyPath: 'id', autoIncrement: true });
+                brandStocksStore.createIndex('store_id', 'store_id', { unique: false });
+                brandStocksStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Brand Stocks store created');
             }
         };
     });
@@ -1034,6 +973,70 @@ async function getListingsByStore(storeId) {
     if (!db) throw new Error('Database not initialized');
     const transaction = db.transaction([LISTINGS_STORE], 'readonly');
     const objectStore = transaction.objectStore(LISTINGS_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get all brands
+ */
+async function getAllBrands() {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([BRANDS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(BRANDS_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.getAll();
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Brand record
+ */
+async function addBrand(brandData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([BRANDS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(BRANDS_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add(brandData);
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Brand Stock record
+ */
+async function addBrandStock(stockData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([BRAND_STOCKS_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(BRAND_STOCKS_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...stockData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get Brand Stock records for a store
+ */
+async function getBrandStocksByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([BRAND_STOCKS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(BRAND_STOCKS_STORE);
     const index = objectStore.index('store_id');
     
     return new Promise((resolve, reject) => {
