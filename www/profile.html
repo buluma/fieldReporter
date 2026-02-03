@@ -8,187 +8,114 @@
         <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
         <meta name="color-scheme" content="light dark">
         <link rel="stylesheet" href="css/index.css">
+        <link rel="stylesheet" href="css/stores.css">
         <title>Profile - Field Reporter</title>
-        <style>
-            .profile-container {
-                padding: 20px;
-                max-width: 1000px;
-                margin: 0 auto;
-            }
-            
-            .profile-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 20px;
-            }
-            
-            .profile-card {
-                background-color: white;
-                border-radius: 8px;
-                padding: 20px;
-                box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-                margin-bottom: 20px;
-            }
-            
-            .profile-info {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 20px;
-            }
-            
-            .info-item {
-                background-color: #f8f9fa;
-                padding: 15px;
-                border-radius: 8px;
-                text-align: center;
-            }
-            
-            .info-label {
-                font-size: 14px;
-                color: #666;
-                margin-bottom: 5px;
-            }
-            
-            .info-value {
-                font-size: 18px;
-                font-weight: bold;
-                color: #333;
-            }
-            
-            .back-btn {
-                background-color: #4CAF50;
-                color: white;
-                padding: 10px 20px;
-                text-decoration: none;
-                border-radius: 4px;
-                display: inline-block;
-                margin-bottom: 20px;
-            }
-            
-            .back-btn:hover {
-                background-color: #45a049;
-            }
-            
-            .loading {
-                text-align: center;
-                padding: 20px;
-            }
-            
-            .error {
-                color: red;
-                padding: 10px;
-                background-color: #ffe6e6;
-                border-radius: 4px;
-                margin: 10px 0;
-            }
-        </style>
     </head>
     <body>
-        <div class="sticky-header">
-            <!-- Top navigation bar -->
-            <div class="top-bar">
-                <span class="title">User Profile</span>
-                <div id="logoutBtn" class="icon-container">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                        <polyline points="16 17 21 12 16 7"></polyline>
-                        <line x1="21" y1="12" x2="9" y2="12"></line>
-                    </svg>
+        <div class="app">
+            <div class="sticky-header">
+                <!-- Top navigation bar -->
+                <div class="top-bar">
+                    <span class="title">GBC - Stock Monitoring 2.0</span>
+                    <div id="logoutBtn" class="icon-container">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                            <polyline points="16 17 21 12 16 7"></polyline>
+                            <line x1="21" y1="12" x2="9" y2="12"></line>
+                        </svg>
+                    </div>
                 </div>
-            </div>
 
-            <div class="top-nav">
-                <div class="nav-tabs">
-                    <a href="index.html" class="nav-tab">Home</a>
-                    <a href="stores.html" class="nav-tab">All Outlets</a>
-                    <a href="my_stores.html" class="nav-tab">My Outlets</a>
-                    <a href="#" class="nav-tab">Data Sync</a>
+                <div class="top-nav">
+                    <div class="nav-tabs">
+                        <a href="index.html" class="nav-tab">Home</a>
+                        <a href="stores.html" class="nav-tab">All Outlets</a>
+                        <a href="my_stores.html" class="nav-tab">My Outlets</a>
+                        <a href="#" class="nav-tab">Data Sync</a>
+                    </div>
                 </div>
             </div>
-        </div>
-        
-        <div class="scrollable-content">
-            <!-- Main content area -->
-            <div id="content" class="main-content">
-                <div class="profile-container">
-                    <div class="profile-header">
-                        <h1>User Profile</h1>
-                        <div>
-                            <button id="editProfileBtn" class="btn btn-primary" style="margin-right: 10px;">Edit Profile</button>
-                            <a href="index.html" class="back-btn" style="margin-bottom: 0;">Back to Home</a>
-                        </div>
+            
+            <div class="scrollable-content">
+                <div class="store-nav-container" style="padding: 10px;">
+                    <a href="index.html" class="btn btn-default">Back to Home</a>
+                </div>
+
+                <div id="content" class="main-content">
+                    <div class="header-with-action" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                        <h3 style="margin: 0;">User Profile</h3>
+                        <button id="editProfileBtn" class="btn btn-primary">Edit Profile</button>
                     </div>
                     
-                    <div id="loading" class="loading">Loading profile information...</div>
-                    <div id="error" class="error" style="display: none;"></div>
+                    <div id="loading" class="loading" style="text-align: center; padding: 20px;">Loading profile...</div>
+                    <div id="error" class="alert alert-danger hidden"></div>
                     
                     <div id="profileContent" style="display: none;">
-                        <div class="profile-card">
-                            <div class="profile-info">
-                                <div class="info-item">
-                                    <div class="info-label">User ID</div>
-                                    <div id="userId" class="info-value">-</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Username</div>
-                                    <div id="username" class="info-value">-</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Email</div>
-                                    <div id="email" class="info-value">-</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Assigned Role</div>
-                                    <div id="assigned" class="info-value">-</div>
-                                </div>
-                                <div class="info-item">
-                                    <div class="info-label">Account Created</div>
-                                    <div id="accountCreated" class="info-value">-</div>
-                                </div>
+                        <div class="list-group">
+                            <div class="list-group-item">
+                                <p style="margin: 0; font-size: 12px; color: #666;">User ID</p>
+                                <h4 id="userId" style="margin: 5px 0 0 0; color: #333;">-</h4>
+                            </div>
+                            <div class="list-group-item">
+                                <p style="margin: 0; font-size: 12px; color: #666;">Username</p>
+                                <h4 id="username" style="margin: 5px 0 0 0; color: #333;">-</h4>
+                            </div>
+                            <div class="list-group-item">
+                                <p style="margin: 0; font-size: 12px; color: #666;">Email</p>
+                                <h4 id="email" style="margin: 5px 0 0 0; color: #333;">-</h4>
+                            </div>
+                            <div class="list-group-item">
+                                <p style="margin: 0; font-size: 12px; color: #666;">Assigned Role</p>
+                                <h4 id="assigned" style="margin: 5px 0 0 0; color: #333;">-</h4>
+                            </div>
+                            <div class="list-group-item">
+                                <p style="margin: 0; font-size: 12px; color: #666;">Account Created</p>
+                                <h4 id="accountCreated" style="margin: 5px 0 0 0; color: #333;">-</h4>
                             </div>
                         </div>
                         
-                        <div class="profile-card">
-                            <h3>Recent Login Activity</h3>
-                            <div id="recentLogins">
-                                <p>Loading recent login activity...</p>
+                        <div style="margin-top: 25px;">
+                            <h4 style="color: #666; margin-bottom: 10px; padding-left: 5px;">Recent Login Activity</h4>
+                            <div id="recentLogins" class="list-group">
+                                <div class="list-group-item">Loading activity...</div>
                             </div>
                         </div>
                     </div>
 
                     <!-- Modal for editing profile -->
-                    <div class="modal fade" id="edit-profile-modal" tabindex="-1" role="dialog" style="display: none;">
+                    <div class="modal fade" id="edit-profile-modal" tabindex="-1" role="dialog">
                         <div class="modal-dialog" role="document">
                             <div class="modal-content">
                                 <div class="modal-header">
                                     <h4 class="modal-title">Edit Profile</h4>
                                 </div>
                                 <div class="modal-body">
-                                    <form id="editProfileForm">
-                                        <div class="form-group list-group-item">
-                                            <label for="editUsername">Username</label>
-                                            <input type="text" id="editUsername" class="form-control" required>
-                                        </div>
-                                        <div class="form-group list-group-item">
-                                            <label for="editEmail">Email</label>
-                                            <input type="email" id="editEmail" class="form-control" required>
-                                        </div>
-                                        <div class="form-group list-group-item">
-                                            <label for="editAssigned">Assigned Role</label>
-                                            <select id="editAssigned" class="form-control" required>
-                                                <option value="field">Field Staff</option>
-                                                <option value="team-leader">Team Leader</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group list-group-item">
-                                            <label for="editPassword">New Password (leave blank to keep current)</label>
-                                            <input type="password" id="editPassword" class="form-control">
-                                        </div>
-                                        <div class="form-group list-group-item">
-                                            <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
-                                        </div>
-                                    </form>
+                                    <div class="list-group">
+                                        <form id="editProfileForm">
+                                            <div class="form-group list-group-item">
+                                                <label>Username</label>
+                                                <input type="text" id="editUsername" class="form-control" required>
+                                            </div>
+                                            <div class="form-group list-group-item">
+                                                <label>Email</label>
+                                                <input type="email" id="editEmail" class="form-control" required>
+                                            </div>
+                                            <div class="form-group list-group-item">
+                                                <label>Assigned Role</label>
+                                                <select id="editAssigned" class="form-control" required>
+                                                    <option value="field">Field Staff</option>
+                                                    <option value="team-leader">Team Leader</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group list-group-item">
+                                                <label>New Password (leave blank to keep current)</label>
+                                                <input type="password" id="editPassword" class="form-control">
+                                            </div>
+                                            <div class="form-group list-group-item">
+                                                <button type="submit" class="btn btn-primary btn-block">Save Changes</button>
+                                            </div>
+                                        </form>
+                                    </div>
                                     <div id="editNotification" class="alert alert-success hidden">
                                         Profile updated successfully!
                                     </div>
@@ -205,7 +132,7 @@
         
         <script src="cordova.js"></script>
         <script src="js/db.js"></script>
-        <script src="js/profile.js"></script>
         <script src="js/app.js"></script>
+        <script src="js/profile.js"></script>
     </body>
 </html>

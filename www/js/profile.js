@@ -91,7 +91,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             const sessionUser = JSON.parse(currentUserStr);
             currentUserId = sessionUser.id;
             
-            // Get full user data from DB to ensure we have the 'assigned' field
+            // Get full user data from DB
             const user = await getUserById(currentUserId);
             
             if (!user) {
@@ -118,15 +118,19 @@ document.addEventListener('DOMContentLoaded', async function() {
             const recentLoginsContainer = document.getElementById('recentLogins');
             if (recentLogins && recentLogins.length > 0) {
                 const recentFive = recentLogins.slice(0, 5);
-                let loginsHtml = '<ul style="text-align: left;">';
+                let html = '';
                 recentFive.forEach(login => {
                     const date = new Date(login.timestamp);
-                    loginsHtml += `<li>${date.toLocaleString()} - ${login.eventType}</li>`;
+                    html += `
+                        <div class="list-group-item">
+                            <p style="margin: 0; font-weight: bold; color: #333;">${date.toLocaleString()}</p>
+                            <p style="margin: 5px 0 0 0; font-size: 12px; color: #666;">Event: ${login.eventType}</p>
+                        </div>
+                    `;
                 });
-                loginsHtml += '</ul>';
-                recentLoginsContainer.innerHTML = loginsHtml;
+                recentLoginsContainer.innerHTML = html;
             } else {
-                recentLoginsContainer.innerHTML = '<p>No recent login activity found.</p>';
+                recentLoginsContainer.innerHTML = '<div class="list-group-item">No recent login activity found.</div>';
             }
             
             loadingElement.style.display = 'none';
@@ -135,7 +139,7 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.error('Error loading profile:', error);
             loadingElement.style.display = 'none';
             errorElement.textContent = 'Error loading profile: ' + error.message;
-            errorElement.style.display = 'block';
+            errorElement.classList.remove('hidden');
         }
     }
 
