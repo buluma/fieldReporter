@@ -85,11 +85,11 @@ button:hover {
 
 @media screen and (prefers-color-scheme: dark) {
     .login-container {
-        background-image: linear-gradient(to bottom, #585858 0%, #1B1B1B 51%);
+        /* background-image: linear-gradient(to bottom, #585858 0%, #1B1B1B 51%); */
     }
 
     .login-box {
-        background-color: #33333382;
+        background-color: #333333a3;
     }
 
     .login-box h1, .login-box h2 {
