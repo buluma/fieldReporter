@@ -1,0 +1,17 @@
+/* Basic styles for stores_map.html */
+#map {
+    height: 100%; /* Ensure map fills its container */
+    width: 100%;
+}
+
+/* Ensure body and html take full height for map display */
+html, body, .app, .scrollable-content, .main-content {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevent body scroll if map handles its own scroll */
+}
+
+.sticky-header {
+    flex-shrink: 0; /* Prevent header from shrinking */
+}

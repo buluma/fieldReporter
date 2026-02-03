@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 3; // Incremented to allow for schema changes
+const DB_VERSION = 5; // Incremented to allow for schema changes
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -75,8 +75,36 @@ function initDB() {
                 const storesStore = db.createObjectStore(STORES_STORE, { keyPath: 'id', autoIncrement: true });
                 storesStore.createIndex('name', 'name', { unique: true });
                 storesStore.createIndex('region', 'region', { unique: false });
+                storesStore.createIndex('userId', 'userId', { unique: false }); // New index for associated user
+                storesStore.createIndex('latitude', 'latitude', { unique: false }); // New index for latitude
+                storesStore.createIndex('longitude', 'longitude', { unique: false }); // New index for longitude
                 console.log('Stores store created');
             }
+        };
+    });
+}
+
+/**
+ * Get all users from the database
+ */
+async function getAllUsers() {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+
+    const transaction = db.transaction([USERS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(USERS_STORE);
+
+    return new Promise((resolve, reject) => {
+        const request = objectStore.getAll();
+
+        request.onsuccess = () => {
+            resolve(request.result);
+        };
+
+        request.onerror = () => {
+            console.error('Error retrieving all users:', request.error);
+            reject(request.error);
         };
     });
 }
@@ -435,6 +463,29 @@ async function deleteStore(id) {
             console.error('Error deleting store:', request.error);
             reject(request.error);
         };
+    });
+}
+
+/**
+ * Geolocation function to get user's current latitude and longitude.
+ */
+async function getUserLocation() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.geolocation) {
+            reject(new Error('Geolocation is not supported by your browser'));
+        } else {
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    resolve({
+                        latitude: position.coords.latitude,
+                        longitude: position.coords.longitude,
+                    });
+                },
+                (error) => {
+                    reject(new Error(`Unable to retrieve your location: ${error.message}`));
+                }
+            );
+        }
     });
 }
 

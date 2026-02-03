@@ -4,6 +4,7 @@ let editingStoreId = null; // Global variable to store the ID of the store being
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize database
     await initDB();
+    populateUsersDropdown(); // Populate dropdown with users
     
     // Elements
     const addStoreBtn = document.getElementById('addStore');
@@ -39,6 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         storeSubmitBtn.textContent = 'Save'; // Reset submit button text
         formNotification.classList.remove('alert-danger'); // Remove error styling
         deleteStoreBtn.classList.add('hidden'); // Hide delete button by default
+        document.getElementById('storeUserId').value = ''; // Reset user dropdown
+        document.getElementById('storeLatitude').value = ''; // Clear latitude
+        document.getElementById('storeLongitude').value = ''; // Clear longitude
     }
 
     // Load and display stores
@@ -91,6 +95,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('email').value = store.email;
                 document.getElementById('contactperson').value = store.contactperson;
                 document.getElementById('storeremarks').value = store.notes;
+                document.getElementById('storeUserId').value = store.userId; // Set selected user
+                document.getElementById('storeLatitude').value = store.latitude || ''; // Populate latitude
+                document.getElementById('storeLongitude').value = store.longitude || ''; // Populate longitude
 
                 // Set editing state
                 editingStoreId = storeId;
@@ -113,6 +120,30 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function saveStore(event) {
         event.preventDefault();
         
+        const storeUserId = parseInt(document.getElementById('storeUserId').value);
+        if (isNaN(storeUserId)) {
+            formNotification.classList.remove('hidden');
+            formNotification.classList.add('alert-danger');
+            formNotification.querySelector('p').textContent = 'Please select an associated user.';
+            return;
+        }
+
+        let latitude = null;
+        let longitude = null;
+        try {
+            const userLocation = await getUserLocation();
+            latitude = userLocation.latitude;
+            longitude = userLocation.longitude;
+            document.getElementById('storeLatitude').value = latitude; // Populate hidden field
+            document.getElementById('storeLongitude').value = longitude; // Populate hidden field
+        } catch (geolocationError) {
+            console.warn('Geolocation error:', geolocationError.message);
+            formNotification.classList.remove('hidden');
+            formNotification.classList.add('alert-warning'); // Use warning for non-critical error
+            formNotification.querySelector('p').textContent = `Warning: Could not get location. ${geolocationError.message}`;
+            // Optionally, ask user if they want to proceed without location or make location mandatory
+        }
+
         const storeData = {
             name: document.getElementById('storename').value,
             region: document.getElementById('region').value,
@@ -122,6 +153,9 @@ document.addEventListener('DOMContentLoaded', async () => {
             email: document.getElementById('email').value,
             contactperson: document.getElementById('contactperson').value,
             notes: document.getElementById('storeremarks').value,
+            userId: storeUserId, // Add userId to storeData
+            latitude: latitude, // Add latitude to storeData
+            longitude: longitude // Add longitude to storeData
         };
 
         try {
@@ -155,7 +189,32 @@ document.addEventListener('DOMContentLoaded', async () => {
         showModal();
     });
 
+    // Event listener for opening the map page
+    document.getElementById('openMapBtn').addEventListener('click', () => {
+        window.location.href = 'stores_map.html';
+    });
+
+
     formstore.addEventListener('submit', saveStore);
+
+    // Event listener for delete button in the modal
+    deleteStoreBtn.addEventListener('click', async () => {
+        if (editingStoreId && confirm('Are you sure you want to delete this store?')) {
+            try {
+                await deleteStore(editingStoreId);
+                formNotification.classList.remove('hidden');
+                formNotification.classList.remove('alert-danger');
+                formNotification.querySelector('p').textContent = 'Item Successfully Deleted';
+                hideModal(); // Hide modal after successful delete
+                loadStores(); // Refresh list
+            } catch (error) {
+                console.error('Error deleting store:', error);
+                formNotification.classList.remove('hidden');
+                formNotification.classList.add('alert-danger');
+                formNotification.querySelector('p').textContent = `Error deleting item: ${error.message}`;
+            }
+        }
+    });
 
     formModal.addEventListener('click', (event) => {
         if (event.target === formModal) { // Click outside the modal content
@@ -164,6 +223,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     closeModalBtn.addEventListener('click', hideModal); // New event listener for the Close button
+
+    // Geolocation function
+    async function getUserLocation() {
+        return new Promise((resolve, reject) => {
+            if (!navigator.geolocation) {
+                reject(new Error('Geolocation is not supported by your browser'));
+            } else {
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        resolve({
+                            latitude: position.coords.latitude,
+                            longitude: position.coords.longitude,
+                        });
+                    },
+                    (error) => {
+                        reject(new Error(`Unable to retrieve your location: ${error.message}`));
+                    }
+                );
+            }
+        });
+    }
+
+    // Populate users dropdown
+    async function populateUsersDropdown() {
+        const storeUserIdSelect = document.getElementById('storeUserId');
+        storeUserIdSelect.innerHTML = '<option value="">-- Select User --</option>'; // Clear existing options
+        try {
+            const users = await getAllUsers();
+            users.forEach(user => {
+                const option = document.createElement('option');
+                option.value = user.id;
+                option.textContent = user.username;
+                storeUserIdSelect.appendChild(option);
+            });
+        } catch (error) {
+            console.error('Error populating users dropdown:', error);
+            // Optionally add an error option to the select
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'Error loading users';
+            option.disabled = true;
+            storeUserIdSelect.appendChild(option);
+        }
+    }
 
     // Initial load
     loadStores();
