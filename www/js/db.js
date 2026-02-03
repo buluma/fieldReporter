@@ -110,6 +110,31 @@ async function getAllUsers() {
 }
 
 /**
+ * Helper function to get user by ID
+ */
+async function getUserById(id) {
+    if (!db) {
+        throw new Error('Database not initialized');
+    }
+    
+    const transaction = db.transaction([USERS_STORE], 'readonly');
+    const objectStore = transaction.objectStore(USERS_STORE);
+    
+    return new Promise((resolve, reject) => {
+        const request = objectStore.get(id);
+        
+        request.onsuccess = () => {
+            resolve(request.result);
+        };
+        
+        request.onerror = () => {
+            console.error('Error retrieving user:', request.error);
+            reject(request.error);
+        };
+    });
+}
+
+/**
  * Add a new user to the database
  */
 async function addUser(userData) {

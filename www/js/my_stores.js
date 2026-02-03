@@ -1,4 +1,4 @@
-let editingStoreId = null; // Global variable to store the ID of the store being edited
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     // Initialize database
@@ -13,7 +13,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     const formNotification = document.getElementById('FormNotification');
     const dataList = document.querySelector('.dataList');
     const modalTitle = document.getElementById('myModalLabel');
-    const deleteStoreBtn = document.getElementById('deleteStoreBtn'); // Get the new delete button
     const closeModalBtn = document.getElementById('closeModalBtn'); // Get the new close button
 
     // Modal control functions
@@ -34,11 +33,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     function resetForm() {
         formstore.reset();
         formNotification.classList.add('hidden');
-        editingStoreId = null; // Reset editing state
+        // editingStoreId = null; // Removed as edit functionality is removed
         modalTitle.textContent = 'New Outlet'; // Reset modal title
         storeSubmitBtn.textContent = 'Save'; // Reset submit button text
         formNotification.classList.remove('alert-danger'); // Remove error styling
-        deleteStoreBtn.classList.add('hidden'); // Hide delete button by default
+        // deleteStoreBtn.classList.add('hidden'); // Removed as delete functionality is removed
         document.getElementById('storeUserId').value = ''; // Reset user dropdown
         document.getElementById('storeLatitude').value = ''; // Clear latitude
         document.getElementById('storeLongitude').value = ''; // Clear longitude
@@ -76,13 +75,10 @@ document.addEventListener('DOMContentLoaded', async () => {
                         <div class="store-card-icon"></div>
                         <h4>${store.name}</h4>
                     `;
-                    // Attach click listener to the card itself for editing
-                    storeCard.addEventListener('click', async (event) => {
-                        // Prevent card click from triggering if delete button was clicked
-                        if (!event.target.classList.contains('delete-store') && !event.target.closest('.delete-store')) {
-                            const storeId = parseInt(storeCard.dataset.id);
-                            await editStore(storeId);
-                        }
+                    // Attach click listener to the card itself to view store details
+                    storeCard.addEventListener('click', () => {
+                        const storeId = parseInt(storeCard.dataset.id);
+                        window.location.href = `store.html?id=${storeId}`;
                     });
                     dataList.appendChild(storeCard);
                 });
@@ -92,50 +88,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             console.error('Error loading stores:', error);
             dataList.innerHTML = `<div class="list-group-item error">Error loading stores: ${error.message}</div>`;
-        }
-    }
-
-    // Fetch and populate form for editing
-    async function editStore(storeId) {
-        try {
-            const store = await getStoreById(storeId);
-            if (store) {
-                // Populate form fields
-                document.getElementById('storename').value = store.name;
-                document.getElementById('region').value = store.region;
-                document.getElementById('location').value = store.location;
-                document.getElementById('address').value = store.address;
-                document.getElementById('phone').value = store.phone;
-                document.getElementById('email').value = store.email;
-                document.getElementById('contactperson').value = store.contactperson;
-                document.getElementById('storeremarks').value = store.notes;
-                document.getElementById('storeUserId').value = store.userId; // Set selected user
-                document.getElementById('storeLatitude').value = store.latitude || ''; // Populate latitude
-                document.getElementById('storeLongitude').value = store.longitude || ''; // Populate longitude
-
-                // Set editing state
-                editingStoreId = storeId;
-                modalTitle.textContent = 'Edit Outlet'; // Change modal title
-                storeSubmitBtn.textContent = 'Update'; // Change submit button text
-                formNotification.classList.add('hidden'); // Hide any previous notification
-                deleteStoreBtn.classList.remove('hidden'); // Show delete button
-
-                // Disable storeUserId select if it's my_stores page
-                const storeUserIdSelect = document.getElementById('storeUserId');
-                const currentUser = getCurrentUser();
-                if (currentUser && store.userId === currentUser.id) {
-                    storeUserIdSelect.disabled = true;
-                } else {
-                    storeUserIdSelect.disabled = false;
-                }
-
-                showModal();
-            }
-        } catch (error) {
-            console.error('Error fetching store for edit:', error);
-            formNotification.classList.remove('hidden');
-            formNotification.classList.add('alert-danger');
-            formNotification.querySelector('p').textContent = `Error fetching store for edit: ${error.message}`;
         }
     }
 
@@ -195,15 +147,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         };
 
         try {
-            if (editingStoreId) {
-                // Update existing store
-                await updateStore(editingStoreId, storeData);
-                formNotification.querySelector('p').textContent = 'Item Successfully Updated';
-            } else {
-                // Add new store
-                await addStore(storeData);
-                formNotification.querySelector('p').textContent = 'Item Successfully Saved';
-            }
+            // Always add new store in my_stores.html
+            await addStore(storeData);
+            formNotification.querySelector('p').textContent = 'Item Successfully Saved';
             
             formNotification.classList.remove('hidden');
             formNotification.classList.remove('alert-danger'); // Remove error styling if present
@@ -226,32 +172,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await populateLocationFields(); // Attempt to prefill location
     });
 
-    // Event listener for opening the map page
-    document.getElementById('openMapBtn').addEventListener('click', () => {
-        window.location.href = 'stores_map.html';
-    });
-
-
     formstore.addEventListener('submit', saveStore);
-
-    // Event listener for delete button in the modal
-    deleteStoreBtn.addEventListener('click', async () => {
-        if (editingStoreId && confirm('Are you sure you want to delete this store?')) {
-            try {
-                await deleteStore(editingStoreId);
-                formNotification.classList.remove('hidden');
-                formNotification.classList.remove('alert-danger');
-                formNotification.querySelector('p').textContent = 'Item Successfully Deleted';
-                hideModal(); // Hide modal after successful delete
-                loadStores(); // Refresh list
-            } catch (error) {
-                console.error('Error deleting store:', error);
-                formNotification.classList.remove('hidden');
-                formNotification.classList.add('alert-danger');
-                formNotification.querySelector('p').textContent = `Error deleting item: ${error.message}`;
-            }
-        }
-    });
 
     formModal.addEventListener('click', (event) => {
         if (event.target === formModal) { // Click outside the modal content
@@ -259,7 +180,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
     });
 
-    closeModalBtn.addEventListener('click', hideModal); // New event listener for the Close button
+    if (closeModalBtn) {
+        closeModalBtn.addEventListener('click', hideModal); // New event listener for the Close button
+    }
 
     // Populate latitude/longitude fields if empty
     async function populateLocationFields() {

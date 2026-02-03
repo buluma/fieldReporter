@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+        <meta name="format-detection" content="telephone=no">
+        <meta name="msapplication-tap-highlight" content="no">
+        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+        <meta name="color-scheme" content="light dark">
+        <link rel="stylesheet" href="css/index.css">
+        <link rel="stylesheet" href="css/stores.css"> <!-- Re-use stores.css for general form/list styling -->
+        <title>Store Details - Field Reporter</title>
+</head>
+<body>
+    <div class="app">
+        <div class="sticky-header">
+            <!-- Top navigation bar -->
+            <div class="top-bar">
+                <span class="title">GBC - Stock Monitoring 2.0</span>
+                <div id="logoutBtn" class="icon-container">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                        <polyline points="16 17 21 12 16 7"></polyline>
+                        <line x1="21" y1="12" x2="9" y2="12"></line>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="top-nav">
+                <div class="nav-tabs">
+                    <a href="index.html" class="nav-tab">Home</a>
+                    <a href="stores.html" class="nav-tab">All Outlets</a>
+                    <a href="my_stores.html" class="nav-tab active">My Outlets</a>
+                    <a href="#" class="nav-tab">Data Sync</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="scrollable-content">
+            <div id="content" class="main-content">
+                <div class="store-details-container" style="padding: 15px;">
+                    <button id="backToMyStoresBtn" class="btn btn-default" style="margin-bottom: 15px;">Back to My Outlets</button>
+                    <h2 id="storeName" style="margin-top: 0;">Store Name</h2>
+                    <div class="details-card">
+                        <p><strong>Region:</strong> <span id="storeRegion"></span></p>
+                        <p><strong>Location:</strong> <span id="storeLocation"></span></p>
+                        <p><strong>Address:</strong> <span id="storeAddress"></span></p>
+                        <p><strong>Phone:</strong> <span id="storePhone"></span></p>
+                        <p><strong>Email:</strong> <span id="storeEmail"></span></p>
+                        <p><strong>Contact Person:</strong> <span id="storeContactPerson"></span></p>
+                        <p><strong>Notes:</strong> <span id="storeNotes"></span></p>
+                        <p><strong>Associated User:</strong> <span id="storeAssociatedUser"></span></p>
+                        <p><strong>Latitude:</strong> <span id="storeLatitude"></span></p>
+                        <p><strong>Longitude:</strong> <span id="storeLongitude"></span></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script src="cordova.js"></script>
+        <script src="js/db.js"></script>
+        <script src="js/app.js"></script>
+        <script src="js/store.js"></script>
+</body>
+</html>
