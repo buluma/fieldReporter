@@ -1,74 +1,119 @@
-$(document).ready(function(){
-  fetchObjectives();
-});
-// grab url params
-// Getting URL var by its name
-var itemtype = $.getUrlVar('type');
-var itemid = $.getUrlVar('store_id');
-var storename = decodeURI($.getUrlVar('store_name'));
-var store_server_id = $.getUrlVar('store_server_id');
+document.addEventListener('DOMContentLoaded', async () => {
+    await initDB(); // Initialize DB
 
-function fetchObjectives(){
-    var q = "SELECT * FROM other_objectives WHERE store_id = ? ORDER BY created DESC LIMIT 10"; 
-    db.transaction(function (t) {
-        t.executeSql(q, [itemid], function (t, data) {     
-          var pl ='';
-          for (var i =0;i<data.rows.length;i++) {
-            pl += '<a href="#" class="list-group-item">';
-            pl += '<span class="badge">'+data.rows.item(i).created+'</span>';
-            pl += '<h4 class="list-group-item-heading">'+data.rows.item(i).objective+'</h4>';
-            pl += '<p><strong>Achieved:</strong> '+data.rows.item(i).objective_achieved+'</p>';
-          
-            if (data.rows.item(i).objective_achieved == 'No'){
-                pl += '<p><strong>Challenge Faced:</strong> '+data.rows.item(i).challenge+'</p>';
-            }  
-            
-            pl += '<p><strong>Next Plan:</strong> '+data.rows.item(i).next_plan+'</p>';
-            pl += '</a>';
-          }
-              $('article#objectivelist .dataList').html(pl);
-        });
+    const urlParams = new URLSearchParams(window.location.search);
+    const storeId = urlParams.get('store_id');
+    const storeName = urlParams.get('store_name');
+
+    const pageTitle = document.getElementById('pageTitle');
+    const objectiveList = document.querySelector('.dataList');
+    const formModal = document.getElementById('form-modal');
+    const formObjective = document.getElementById('form_objective');
+    const formNotification = document.getElementById('formNotification');
+    const addObjectiveBtn = document.getElementById('addObjectiveBtn');
+    const closeModalBtn = document.getElementById('closeModalBtn');
+    const backToStoreBtn = document.getElementById('backToStoreBtn');
+
+    if (storeName) {
+        pageTitle.textContent = `Other Objectives: ${decodeURIComponent(storeName)}`;
+    }
+
+    // Modal Control
+    function showModal() {
+        formModal.style.display = 'block';
+        formModal.classList.add('in');
+        document.body.classList.add('modal-open');
+    }
+
+    function hideModal() {
+        formModal.style.display = 'none';
+        formModal.classList.remove('in');
+        document.body.classList.remove('modal-open');
+        resetForm();
+    }
+
+    function resetForm() {
+        formObjective.reset();
+        formNotification.classList.add('hidden');
+    }
+
+    // Event Listeners
+    addObjectiveBtn.addEventListener('click', showModal);
+    closeModalBtn.addEventListener('click', hideModal);
+    backToStoreBtn.addEventListener('click', () => {
+        window.location.href = `store.html?id=${storeId}`;
     });
-    
-}
-function saveObjective() {
-    var coords = userlocation;
-    var objective = document.getElementById("objective").value;
-    var objective_achieved = document.getElementById("obj_achieved").value;
-    var challenge = document.getElementById("obj_challenge").value;
-    var next_plan = document.getElementById("obj_plan").value;
-    var submitter = username;
-    var store = storename;
 
-    db.transaction(function(st) { 
-        //st.executeSql('DROP TABLE objectives');
-        st.executeSql('CREATE TABLE IF NOT EXISTS other_objectives (id INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,inputdate VARCHAR, coords VARCHAR,objective VARCHAR, objective_achieved VARCHAR, challenge VARCHAR, next_plan VARCHAR, submitter VARCHAR,store VARCHAR,store_id INTEGER, store_server_id INTEGER,modified TEXT, created TIMESTAMP DEFAULT CURRENT_TIMESTAMP NOT NULL,last_sync TEXT DEFAULT "none")');
-        st.executeSql("INSERT INTO other_objectives(coords,objective,objective_achieved,challenge,next_plan,submitter,store,store_id,store_server_id) values (?,?,?,?,?,?,?,?,?)",
-            [coords,objective,objective_achieved,challenge,next_plan,submitter,store,itemid,store_server_id], alertSuccess);
-    },function(error){
-        console.log(error.message)
-    },onReadyTransaction);
-}
-
-var backLink = '<h5><a href="storemenu.html?store_id='+itemid+'&store_server_id='+store_server_id+'&store_name='+storename+'" class="button">';
-backLink += '<span class="glyphicon glyphicon-arrow-left"> '+storename+'</a></h5>';
-
-var newsku = '<h4 class="pull-left"> My Other Objectives</h4>';
-newsku += '<button type="button" class="btn btn-warning pull-right" data-toggle="modal" data-target="#form-modal">Add</button>';
-
-
-$(document).ready(function() {
-    $('.navbar-header').append(backLink);
-    $('#newsku').append(newsku);
-
-    $('form#objectivesinput').on('submit', function(e){
+    formObjective.addEventListener('submit', async (e) => {
         e.preventDefault();
-        if (formValidated(this)){
-            saveObjective();
-            $('#objectivesinput input)').val('');      
-        }           
+        await saveObjective();
     });
-    $('#form-modal').on('hidden.bs.modal', function (e) {
-        fetchObjectives();
-    })
+
+    async function saveObjective() {
+        try {
+            const currentUser = getCurrentUser();
+            const location = await getUserLocation();
+            
+            const data = {
+                store_id: parseInt(storeId),
+                objective: document.getElementById('objective').value,
+                achieved: document.getElementById('obj_achieved').value,
+                challenge: document.getElementById('obj_challenge').value,
+                plan: document.getElementById('obj_plan').value,
+                submitter: currentUser ? currentUser.username : 'Unknown',
+                coords: `${location.latitude},${location.longitude}`
+            };
+
+            await addOtherObjective(data);
+            
+            formNotification.classList.remove('hidden');
+            formObjective.reset();
+            
+            // Refresh list
+            await fetchObjectives();
+            
+            // Hide modal after a short delay
+            setTimeout(hideModal, 1500);
+            
+        } catch (error) {
+            alert('Error saving objective: ' + error.message);
+        }
+    }
+
+    async function fetchObjectives() {
+        if (!storeId) return;
+        
+        objectiveList.innerHTML = '<div class="list-group-item">Loading...</div>';
+        
+        try {
+            const items = await getOtherObjectivesByStore(storeId);
+            objectiveList.innerHTML = '';
+            
+            if (items.length === 0) {
+                objectiveList.innerHTML = '<div class="list-group-item">No records found.</div>';
+                return;
+            }
+
+            items.forEach(item => {
+                const date = new Date(item.created_on).toLocaleString();
+                const div = document.createElement('div');
+                div.className = 'list-group-item';
+                div.innerHTML = `
+                    <h4 class="list-group-item-heading" style="margin-bottom: 10px; color: #337ab7;">${item.objective}</h4>
+                    <p style="font-size: 12px; color: #666; margin-bottom: 5px;">${date}</p>
+                    <p><strong>Achieved:</strong> ${item.achieved}</p>
+                    ${item.challenge ? `<p><strong>Challenge:</strong> ${item.challenge}</p>` : ''}
+                    ${item.plan ? `<p><strong>Next Plan:</strong> ${item.plan}</p>` : ''}
+                    <p style="font-size: 10px; color: #999; margin-top: 10px;">By: ${item.submitter} | Loc: ${item.coords}</p>
+                `;
+                objectiveList.appendChild(div);
+            });
+        } catch (error) {
+            console.error('Error fetching objectives:', error);
+            objectiveList.innerHTML = `<div class="list-group-item error">Error: ${error.message}</div>`;
+        }
+    }
+
+    // Initial Load
+    await fetchObjectives();
 });

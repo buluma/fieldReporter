@@ -130,10 +130,16 @@ document.addEventListener('DOMContentLoaded', async () => {
             { name: 'Activation', icon: '📊', link: 'activation.html', table: ACTIVATION_STORE }
         ];
 
-        // Add TL specific items if role matches
-        if (currentUser && currentUser.assigned === 'team-leader') {
-            menuItems.push({ name: 'My Objectives', icon: '🎯', link: 'tl_objectives.html', table: TL_OBJECTIVES_STORE });
-            menuItems.push({ name: 'Focus Areas', icon: '🔍', link: 'tl_focus.html', table: TL_FOCUS_STORE });
+        if (currentUser) {
+            if (currentUser.assigned === 'team-leader') {
+                // Team Leader specific menus
+                menuItems.push({ name: 'My Objectives', icon: '🎯', link: 'tl_objectives.html', table: TL_OBJECTIVES_STORE });
+                menuItems.push({ name: 'Focus Areas', icon: '🔍', link: 'tl_focus.html', table: TL_FOCUS_STORE });
+            } else {
+                // Field Staff specific menus (default)
+                menuItems.push({ name: 'Objectives', icon: '🎯', link: 'objectives.html', table: OBJECTIVES_STORE });
+                menuItems.push({ name: 'Other Objectives', icon: '📝', link: 'other_objectives.html', table: OTHER_OBJECTIVES_STORE });
+            }
         }
 
         let html = '';

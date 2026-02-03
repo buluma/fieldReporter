@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 13; // Incremented for TL Focus and Objectives
+const DB_VERSION = 14; // Incremented for Objectives and Other Objectives
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -11,6 +11,8 @@ const ACTIVATION_STORE = 'activation'; // New store for activation status
 const VISIBILITY_STORE = 'visibility'; // New store for visibility status
 const TL_FOCUS_STORE = 'tl_focus'; // New store for TL Focus Areas
 const TL_OBJECTIVES_STORE = 'tl_objectives'; // New store for TL Objectives
+const OBJECTIVES_STORE = 'objectives'; // New store for Field Objectives
+const OTHER_OBJECTIVES_STORE = 'other_objectives'; // New store for Other Objectives
 
 let db;
 
@@ -145,6 +147,22 @@ function initDB() {
                 tlObjectivesStore.createIndex('store_id', 'store_id', { unique: false });
                 tlObjectivesStore.createIndex('created_on', 'created_on', { unique: false });
                 console.log('TL Objectives store created');
+            }
+
+            // Create objectives object store if it doesn't exist
+            if (!db.objectStoreNames.contains(OBJECTIVES_STORE)) {
+                const objectivesStore = db.createObjectStore(OBJECTIVES_STORE, { keyPath: 'id', autoIncrement: true });
+                objectivesStore.createIndex('store_id', 'store_id', { unique: false });
+                objectivesStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Objectives store created');
+            }
+
+            // Create other_objectives object store if it doesn't exist
+            if (!db.objectStoreNames.contains(OTHER_OBJECTIVES_STORE)) {
+                const otherObjectivesStore = db.createObjectStore(OTHER_OBJECTIVES_STORE, { keyPath: 'id', autoIncrement: true });
+                otherObjectivesStore.createIndex('store_id', 'store_id', { unique: false });
+                otherObjectivesStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Other Objectives store created');
             }
         };
     });
@@ -899,6 +917,78 @@ async function getTLObjectiveByStore(storeId) {
     if (!db) throw new Error('Database not initialized');
     const transaction = db.transaction([TL_OBJECTIVES_STORE], 'readonly');
     const objectStore = transaction.objectStore(TL_OBJECTIVES_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Objective record
+ */
+async function addObjective(objectiveData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([OBJECTIVES_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(OBJECTIVES_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...objectiveData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get Objective records for a store
+ */
+async function getObjectivesByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([OBJECTIVES_STORE], 'readonly');
+    const objectStore = transaction.objectStore(OBJECTIVES_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Other Objective record
+ */
+async function addOtherObjective(objectiveData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([OTHER_OBJECTIVES_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(OTHER_OBJECTIVES_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...objectiveData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get Other Objective records for a store
+ */
+async function getOtherObjectivesByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([OTHER_OBJECTIVES_STORE], 'readonly');
+    const objectStore = transaction.objectStore(OTHER_OBJECTIVES_STORE);
     const index = objectStore.index('store_id');
     
     return new Promise((resolve, reject) => {
