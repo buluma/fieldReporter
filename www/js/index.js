@@ -72,4 +72,13 @@ function setupLogoutHandler() {
             window.location.href = 'login.html';
         });
     }
+
+    // Set up view logs button handler
+    const viewLogsBtn = document.getElementById('viewLogsBtn');
+    if (viewLogsBtn) {
+        viewLogsBtn.addEventListener('click', function() {
+            // Navigate to the login logs page
+            window.location.href = 'login-logs.html';
+        });
+    }
 }
