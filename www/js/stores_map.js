@@ -1,4 +1,7 @@
 document.addEventListener('DOMContentLoaded', async () => {
+    // Fix Leaflet's default icon paths for environments where they aren't automatically resolved
+    L.Icon.Default.imagePath = 'https://unpkg.com/leaflet@1.9.4/dist/images/';
+
     await initDB(); // Initialize DB for getAllStores and getUserLocation
     
     const mapContainer = 'map'; // ID of the map div
@@ -23,8 +26,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (userMarker) {
             userMarker.remove();
         }
+        const currentUser = getCurrentUser(); // Get current user from db.js
+        const userName = currentUser ? currentUser.username : 'Unknown User';
         userMarker = L.marker([latitude, longitude]).addTo(map)
-            .bindPopup('Your Location').openPopup();
+            .bindPopup(`Your Location: <b>${userName}</b>`).openPopup();
         return userMarker;
     }
 
@@ -32,11 +37,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     async function addStoreMarkers() {
         storeMarkers.clearLayers(); // Clear existing store markers
         const stores = await getAllStores();
+        console.log('Stores retrieved from DB:', stores); // DEBUG LOG
+        const users = await getAllUsers();
+        const userIdToUsernameMap = new Map(users.map(user => [user.id, user.username]));
+
         stores.forEach(store => {
-            if (store.latitude && store.longitude) {
+            if (store.latitude && store.longitude) { // CRITICAL CONDITION
+                console.log('Adding marker for store:', store.name, store.latitude, store.longitude); // DEBUG LOG
+                const userName = userIdToUsernameMap.get(store.userId) || 'N/A';
                 const marker = L.marker([store.latitude, store.longitude]).addTo(map)
-                    .bindPopup(`<b>${store.name}</b><br>${store.address || ''}<br>User: ${store.userId || 'N/A'}`); // Display store details
+                    .bindPopup(`<b>${store.name}</b><br>${store.address || ''}<br>User: ${userName}`); // Display store details
                 storeMarkers.addLayer(marker);
+            } else {
+                console.warn('Skipping store marker for:', store.name, 'due to missing/invalid location data:', store.latitude, store.longitude); // DEBUG LOG
             }
         });
         map.addLayer(storeMarkers);
@@ -80,6 +93,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         if (allMarkers.getLayers().length > 0) {
             map.fitBounds(allMarkers.getBounds(), { padding: [50, 50] });
         }
+        map.invalidateSize(); // Invalidate map size to ensure it renders correctly
     }
 
     // Call loadMap when everything is ready

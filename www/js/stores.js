@@ -128,20 +128,33 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
 
-        let latitude = null;
-        let longitude = null;
-        try {
-            const userLocation = await getUserLocation();
-            latitude = userLocation.latitude;
-            longitude = userLocation.longitude;
-            document.getElementById('storeLatitude').value = latitude; // Populate hidden field
-            document.getElementById('storeLongitude').value = longitude; // Populate hidden field
-        } catch (geolocationError) {
-            console.warn('Geolocation error:', geolocationError.message);
-            formNotification.classList.remove('hidden');
-            formNotification.classList.add('alert-warning'); // Use warning for non-critical error
-            formNotification.querySelector('p').textContent = `Warning: Could not get location. ${geolocationError.message}`;
-            // Optionally, ask user if they want to proceed without location or make location mandatory
+        let finalLatitude = null;
+        let finalLongitude = null;
+        const manualLatitude = document.getElementById('storeLatitude').value;
+        const manualLongitude = document.getElementById('storeLongitude').value;
+
+        if (manualLatitude !== '' && manualLongitude !== '') {
+            finalLatitude = parseFloat(manualLatitude);
+            finalLongitude = parseFloat(manualLongitude);
+            if (isNaN(finalLatitude) || isNaN(finalLongitude)) {
+                formNotification.classList.remove('hidden');
+                formNotification.classList.add('alert-danger');
+                formNotification.querySelector('p').textContent = 'Invalid Latitude or Longitude entered.';
+                return;
+            }
+        } else {
+            // Only get user location if manual fields are empty
+            try {
+                const userLocation = await getUserLocation();
+                finalLatitude = userLocation.latitude;
+                finalLongitude = userLocation.longitude;
+            } catch (geolocationError) {
+                console.warn('Geolocation error:', geolocationError.message);
+                formNotification.classList.remove('hidden');
+                formNotification.classList.add('alert-warning');
+                formNotification.querySelector('p').textContent = `Warning: Could not get location. ${geolocationError.message}`;
+                // If location is mandatory, you might return here or set default values
+            }
         }
 
         const storeData = {
@@ -154,8 +167,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             contactperson: document.getElementById('contactperson').value,
             notes: document.getElementById('storeremarks').value,
             userId: storeUserId, // Add userId to storeData
-            latitude: latitude, // Add latitude to storeData
-            longitude: longitude // Add longitude to storeData
+            latitude: finalLatitude, // Use final latitude
+            longitude: finalLongitude // Use final longitude
         };
 
         try {
@@ -184,9 +197,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Event Listeners
-    addStoreBtn.addEventListener('click', () => {
+    addStoreBtn.addEventListener('click', async () => { // Make async to await populateLocationFields
         resetForm(); // Reset form and edit state for new entry
         showModal();
+        await populateLocationFields(); // Attempt to prefill location
     });
 
     // Event listener for opening the map page
@@ -224,27 +238,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     closeModalBtn.addEventListener('click', hideModal); // New event listener for the Close button
 
-    // Geolocation function
-    async function getUserLocation() {
-        return new Promise((resolve, reject) => {
-            if (!navigator.geolocation) {
-                reject(new Error('Geolocation is not supported by your browser'));
-            } else {
-                navigator.geolocation.getCurrentPosition(
-                    (position) => {
-                        resolve({
-                            latitude: position.coords.latitude,
-                            longitude: position.coords.longitude,
-                        });
-                    },
-                    (error) => {
-                        reject(new Error(`Unable to retrieve your location: ${error.message}`));
-                    }
-                );
-            }
-        });
-    }
+    // Populate latitude/longitude fields if empty
+    async function populateLocationFields() {
+        const latitudeInput = document.getElementById('storeLatitude');
+        const longitudeInput = document.getElementById('storeLongitude');
 
+        // Only prefill if fields are currently empty
+        if (!latitudeInput.value && !longitudeInput.value) {
+            try {
+                const userLocation = await getUserLocation();
+                latitudeInput.value = userLocation.latitude;
+                longitudeInput.value = userLocation.longitude;
+                // Clear any previous warning about geolocation
+                formNotification.classList.add('hidden');
+                formNotification.classList.remove('alert-warning');
+                formNotification.querySelector('p').textContent = '';
+            } catch (geolocationError) {
+                console.warn('Geolocation prefill error:', geolocationError.message);
+                formNotification.classList.remove('hidden');
+                formNotification.classList.add('alert-warning');
+                formNotification.querySelector('p').textContent = `Warning: Could not prefill location. ${geolocationError.message}`;
+            }
+        }
+    }
+    
     // Populate users dropdown
     async function populateUsersDropdown() {
         const storeUserIdSelect = document.getElementById('storeUserId');
