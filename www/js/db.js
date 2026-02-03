@@ -9,23 +9,48 @@ let db;
  * Initialize the IndexedDB database
  */
 function initDB() {
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
         const request = indexedDB.open(DB_NAME, DB_VERSION);
-        
+
         request.onerror = () => {
             console.error('Database error:', request.error);
             reject(request.error);
         };
-        
-        request.onsuccess = () => {
+
+        request.onsuccess = async () => {
             db = request.result;
             console.log('Database opened successfully');
+
+            // Check if this is the first time the database is opened (no users exist)
+            const transaction = db.transaction([USERS_STORE], 'readonly');
+            const objectStore = transaction.objectStore(USERS_STORE);
+            const countRequest = objectStore.count();
+
+            countRequest.onsuccess = async () => {
+                if (countRequest.result === 0) {
+                    // No users exist, create a default user
+                    console.log('No users found, creating default user...');
+                    try {
+                        const defaultUser = {
+                            username: 'admin',
+                            password: 'admin123',
+                            email: 'admin@fieldreporter.local'
+                        };
+
+                        await addUser(defaultUser);
+                        console.log('Default user created successfully');
+                    } catch (error) {
+                        console.error('Error creating default user:', error);
+                    }
+                }
+            };
+
             resolve(db);
         };
-        
+
         request.onupgradeneeded = (event) => {
             db = event.target.result;
-            
+
             // Create users object store if it doesn't exist
             if (!db.objectStoreNames.contains(USERS_STORE)) {
                 const objectStore = db.createObjectStore(USERS_STORE, { keyPath: 'id', autoIncrement: true });
