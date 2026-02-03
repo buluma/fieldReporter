@@ -14,6 +14,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const dataList = document.querySelector('.dataList');
     const modalTitle = document.getElementById('myModalLabel');
     const deleteStoreBtn = document.getElementById('deleteStoreBtn'); // Get the new delete button
+    const closeModalBtn = document.getElementById('closeModalBtn'); // Get the new close button
 
     // Modal control functions
     function showModal() {
@@ -161,6 +162,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             hideModal();
         }
     });
+
+    closeModalBtn.addEventListener('click', hideModal); // New event listener for the Close button
 
     // Initial load
     loadStores();
