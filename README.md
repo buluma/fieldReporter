@@ -43,21 +43,33 @@ git clone https://github.com/yourusername/fieldReporter.git
 cd fieldReporter
 ```
 
-2. Install Cordova globally:
+2. (Optional) Set up the backend API:
+```bash
+cd backend
+cp .env.example .env
+npm install
+npx prisma migrate dev
+npx prisma db seed
+node server.js
+```
+
+3. Install Cordova globally:
 ```bash
 npm install -g cordova
 ```
 
-3. Install project dependencies:
+4. Install project dependencies:
 ```bash
 npm install
 ```
 
-4. Add target platforms:
+5. Add target platforms:
 ```bash
 cordova platform add android
 cordova platform add ios
 ```
+
+> The backend uses Prisma with SQLite by default. Update `.env` for other databases or deployment needs.
 
 ## 🏃‍♂️ Running the Application
 
@@ -84,7 +96,17 @@ The application comes with a default user account for development/testing:
 - **Password**: `admin123`
 - **Role**: `team-leader`
 
-On first run, the application automatically creates this default user account. In a production environment, you would implement proper user registration.
+On first run, the backend automatically creates this default user account (configurable via `SEED_ADMIN_USERNAME` and `SEED_ADMIN_PASSWORD`). In a production environment, you would implement proper user registration.
+
+### Backend API Authentication
+
+The backend API provides simple authentication endpoints (no JWTs):
+
+- `POST /auth/register` (create a user)
+- `POST /auth/login` (returns the user profile)
+- `GET /me` (requires `x-username` header)
+
+Run the backend locally and point your mobile app to the API base URL.
 
 ## 📱 Application Structure & Core Modules
 
