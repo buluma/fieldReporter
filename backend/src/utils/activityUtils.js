@@ -1,7 +1,7 @@
 import prisma from "../../config/prismaClient.js";
 
 const createActivityController = (modelName) => {
-  const model = prisma[modelName.toLowerCase()]; // Get Prisma model dynamically
+  const model = prisma[modelName.charAt(0).toLowerCase() + modelName.slice(1)]; // Get Prisma model dynamically
 
   // @desc    Get all activities
   // @route   GET /api/:modelName (e.g., /api/availabilities)
