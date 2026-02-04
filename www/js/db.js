@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 18; // Incremented for Performance Tracking
+const DB_VERSION = 21; // Incremented for Checklist
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -17,6 +17,8 @@ const LISTINGS_STORE = 'listings'; // New store for Product Listings
 const BRANDS_STORE = 'brands'; // Master list of brands
 const BRAND_STOCKS_STORE = 'brand_stocks'; // Brand stock tracking
 const PERFORMANCE_STORE = 'performance'; // Performance tracking
+const DAILY_PLANNER_STORE = 'daily_planner'; // Daily planner
+const CHECKLIST_STORE = 'checklist'; // Checklist
 
 let db;
 
@@ -120,6 +122,25 @@ function initDB() {
                 performanceStore.createIndex('store_id', 'store_id', { unique: false });
                 performanceStore.createIndex('created_on', 'created_on', { unique: false });
                 console.log('Performance store created');
+            }
+
+            // Create daily_planner object store if it doesn't exist
+            if (!db.objectStoreNames.contains(DAILY_PLANNER_STORE)) {
+                const dailyPlannerStore = db.createObjectStore(DAILY_PLANNER_STORE, { keyPath: 'id', autoIncrement: true });
+                dailyPlannerStore.createIndex('daily_date', 'daily_date', { unique: false });
+                dailyPlannerStore.createIndex('week', 'week', { unique: false });
+                dailyPlannerStore.createIndex('month', 'month', { unique: false });
+                dailyPlannerStore.createIndex('year', 'year', { unique: false });
+                dailyPlannerStore.createIndex('submitter', 'submitter', { unique: false });
+                console.log('Daily Planner store created');
+            }
+
+            // Create checklist object store if it doesn't exist
+            if (!db.objectStoreNames.contains(CHECKLIST_STORE)) {
+                const checklistStore = db.createObjectStore(CHECKLIST_STORE, { keyPath: 'id', autoIncrement: true });
+                checklistStore.createIndex('store_id', 'store_id', { unique: false });
+                checklistStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Checklist store created');
             }
         };
     });
@@ -1082,6 +1103,164 @@ async function getPerformanceByStore(storeId) {
     if (!db) throw new Error('Database not initialized');
     const transaction = db.transaction([PERFORMANCE_STORE], 'readonly');
     const objectStore = transaction.objectStore(PERFORMANCE_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Daily Plan record
+ */
+async function addDailyPlan(planData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([DAILY_PLANNER_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(DAILY_PLANNER_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...planData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Update Daily Plan record
+ */
+async function updateDailyPlan(id, planData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([DAILY_PLANNER_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(DAILY_PLANNER_STORE);
+    return new Promise((resolve, reject) => {
+        const getRequest = objectStore.get(id);
+        getRequest.onsuccess = () => {
+            const existingPlan = getRequest.result;
+            if (!existingPlan) {
+                reject(new Error('Daily Plan not found'));
+                return;
+            }
+            const updatedPlan = { ...existingPlan, ...planData, id: id };
+            const putRequest = objectStore.put(updatedPlan);
+            putRequest.onsuccess = () => resolve(putRequest.result);
+            putRequest.onerror = () => reject(putRequest.error);
+        };
+        getRequest.onerror = () => reject(getRequest.error);
+    });
+}
+
+/**
+ * Get Daily Plan record by date (and week, month, year for uniqueness)
+ */
+async function getDailyPlanByDate(date, week, month, year, submitter) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([DAILY_PLANNER_STORE], 'readonly');
+    const objectStore = transaction.objectStore(DAILY_PLANNER_STORE);
+    const dateIndex = objectStore.index('daily_date');
+
+    return new Promise((resolve, reject) => {
+        const request = dateIndex.openCursor(IDBKeyRange.only(date));
+        let plan = null;
+        request.onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+                if (cursor.value.week === week && cursor.value.month === month && cursor.value.year === year && cursor.value.submitter === submitter) {
+                    plan = cursor.value;
+                    resolve(plan);
+                    return;
+                }
+                cursor.continue();
+            } else {
+                resolve(plan); // No matching plan found
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get all Daily Plans for current week, month, year and submitter
+ */
+async function getDailyPlans(week, month, year, submitter) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([DAILY_PLANNER_STORE], 'readonly');
+    const objectStore = transaction.objectStore(DAILY_PLANNER_STORE);
+    const dateIndex = objectStore.index('daily_date'); // Assuming daily_date index is suitable for range queries
+
+    return new Promise((resolve, reject) => {
+        const plans = [];
+        const request = objectStore.openCursor(); // Iterate all
+        // For more targeted queries, use a specific index, e.g., objectStore.index('week').openCursor(IDBKeyRange.only(week));
+
+        request.onsuccess = (event) => {
+            const cursor = event.target.result;
+            if (cursor) {
+                const plan = cursor.value;
+                if (plan.week === week && plan.month === month && plan.year === year && plan.submitter === submitter) {
+                    plans.push(plan);
+                }
+                cursor.continue();
+            } else {
+                resolve(plans.sort((a,b) => new Date(a.daily_date) - new Date(b.daily_date))); // Sort by date
+            }
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+
+/**
+ * Get stores formatted for multi-select dropdown
+ */
+async function getStoresForDailyPlanSelect() {
+    if (!db) throw new Error('Database not initialized');
+    const stores = await getAllStores(); // Re-use existing getAllStores
+    const currentUser = getCurrentUser();
+
+    // Filter stores for the current user if not team-leader
+    let filteredStores = stores;
+    if (currentUser && currentUser.assigned !== 'team-leader') {
+        filteredStores = stores.filter(store => store.userId === currentUser.id);
+    }
+
+    // Format for multiselect
+    return filteredStores.map(store => ({
+        id: store.id,
+        name: store.name
+    }));
+}
+
+/**
+ * Add Checklist record
+ */
+async function addChecklistRecord(checklistData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([CHECKLIST_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(CHECKLIST_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...checklistData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get Checklist records for a store
+ */
+async function getChecklistRecordsByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([CHECKLIST_STORE], 'readonly');
+    const objectStore = transaction.objectStore(CHECKLIST_STORE);
     const index = objectStore.index('store_id');
     
     return new Promise((resolve, reject) => {

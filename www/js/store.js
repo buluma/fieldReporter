@@ -148,7 +148,8 @@ document.addEventListener('DOMContentLoaded', async () => {
             { name: 'Activation', icon: '📊', link: 'activation.html', table: ACTIVATION_STORE },
             { name: 'Listings', icon: '📜', link: 'listings.html', table: LISTINGS_STORE },
             { name: 'Brands', icon: '🏷️', link: 'brands.html', table: BRAND_STOCKS_STORE },
-            { name: 'Performance', icon: '📈', link: 'performance.html', table: PERFORMANCE_STORE }
+            { name: 'Performance', icon: '📈', link: 'performance.html', table: PERFORMANCE_STORE },
+            { name: 'Checklist', icon: '✅', link: 'checklist.html', table: CHECKLIST_STORE }
         ];
 
         const roleSpecificItems = [];
