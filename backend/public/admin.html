@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body { padding-top: 20px; }
+        .container { max-width: 900px; }
+        #login-form, #dashboard-content { margin-bottom: 30px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Admin Dashboard</h1>
+
+        <div id="login-form">
+            <h2>Login</h2>
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" class="form-control" id="username" placeholder="Enter username">
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" class="form-control" id="password" placeholder="Password">
+            </div>
+            <button id="login-button" class="btn btn-primary">Login</button>
+            <p id="login-message" class="text-danger mt-2"></p>
+        </div>
+
+        <div id="dashboard-content" class="hidden">
+            <h2 id="welcome-message"></h2>
+            <button id="logout-button" class="btn btn-warning float-right">Logout</button>
+            <hr>
+
+            <h3>Users</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Username</th>
+                        <th>Role</th>
+                        <th>Created At</th>
+                    </tr>
+                </thead>
+                <tbody id="users-table-body">
+                    <!-- User data will be loaded here -->
+                </tbody>
+            </table>
+
+            <h3>Stores</h3>
+            <table class="table table-bordered">
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Name</th>
+                        <th>Region</th>
+                        <th>User ID</th>
+                        <th>Latitude</th>
+                        <th>Longitude</th>
+                    </tr>
+                </thead>
+                <tbody id="stores-table-body">
+                    <!-- Store data will be loaded here -->
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="js/admin.js"></script>
+</body>
+</html>
