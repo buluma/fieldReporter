@@ -1,7 +1,7 @@
 # Implementation Plan: Backend for Field Reporter
 
 ### ## Approach
-To build a backend for the Field Reporter project, a Node.js application using Express.js will be employed. This approach aligns with the existing JavaScript ecosystem of the frontend, facilitating easier development and potential code sharing. The backend will implement a RESTful API to expose data, allowing for user authentication and retrieval of data currently stored in the client-side IndexedDB. For the database, PostgreSQL is chosen for its robustness, scalability, and strong support for structured data, making it suitable for managing user and field reporting data. Data synchronization will initially involve the client pushing its local IndexedDB data to the backend.
+To build a backend for the Field Reporter project, a Node.js application using Express.js will be employed. This approach aligns with the existing JavaScript ecosystem of the frontend, facilitating easier development and potential code sharing. The backend will implement a RESTful API to expose data, allowing for user authentication and retrieval of data currently stored in the client-side IndexedDB. For the database, PrismaDB (using Prisma ORM with the configured database, likely PostgreSQL or SQLite as per the `backend/prisma` setup) is chosen for its robustness, scalability, and strong support for structured data, making it suitable for managing user and field reporting data. Data synchronization will initially involve the client pushing its local IndexedDB data to the backend.
 
 **Alternatives considered:**
 -   **Python with FastAPI/Django**: While powerful, this would introduce a new language stack to the project.
@@ -12,7 +12,8 @@ To build a backend for the Field Reporter project, a Node.js application using E
 
 1.  **Install Dependencies & Project Setup** (30 min)
     *   Initialize a new Node.js project for the backend.
-    *   Install core dependencies: `express`, `pg` (for PostgreSQL client), `dotenv`, `bcryptjs` (for password hashing), `jsonwebtoken` (for JWT).
+    *   Install core dependencies: `express`, `dotenv`, `bcryptjs` (for password hashing), `jsonwebtoken` (for JWT).
+    *   Ensure Prisma Client is generated: `npx prisma generate`.
     *   Set up a basic project structure (e.g., `src/`, `config/`, `models/`, `routes/`).
     *   Create a `.env` file for environment variables (DB credentials, JWT secret).
 
@@ -20,17 +21,20 @@ To build a backend for the Field Reporter project, a Node.js application using E
     mkdir backend
     cd backend
     npm init -y
-    npm install express pg dotenv bcryptjs jsonwebtoken
+    npm install express dotenv bcryptjs jsonwebtoken @prisma/client
+    npx prisma generate
     ```
 
-2.  **Database Setup & Migration** (60 min)
-    *   Set up a PostgreSQL database.
-    *   Create a migration script or initial SQL schema to replicate the IndexedDB object stores (users, stores, checkins, various activity tables) as tables in PostgreSQL.
-        *   **Key tables**: `users`, `stores`, `login_logs`, `checkin_sessions`, `availability_records`, `placement_records`, `activation_records`, `visibility_records`, `tl_focus_records`, `tl_objectives_records`, `objectives_records`, `other_objectives_records`, `listings_records`, `brands`, `brand_stocks_records`, `performance_records`, `daily_planner_records`, `checklist_records`.
-    *   Implement a database connection utility using `pg`.
+2.  **Database Setup & Schema Management (using Prisma)** (60 min)
+    *   Leverage the existing `backend/prisma` setup.
+    *   Ensure the Prisma schema (`schema.prisma`) accurately reflects the required data models (users, stores, checkins, various activity tables).
+        *   **Key models**: `User`, `Store`, `LoginLog`, `CheckinSession`, `AvailabilityRecord`, `PlacementRecord`, `ActivationRecord`, `VisibilityRecord`, `TLFocusRecord`, `TLObjectiveRecord`, `ObjectiveRecord`, `OtherObjectiveRecord`, `ListingRecord`, `Brand`, `BrandStockRecord`, `PerformanceRecord`, `DailyPlannerRecord`, `ChecklistRecord`.
+    *   Apply migrations using Prisma Migrate: `npx prisma migrate dev --name init`.
+    *   Seed initial data using `npx prisma db seed` if `seed.js` is configured.
+    *   Instantiate Prisma Client for database interactions.
 
 3.  **Authentication Module** (90 min)
-    *   Create user model/schema to interact with the `users` table.
+    *   Create user model/schema to interact with the `User` model via Prisma Client.
     *   Implement user registration (optional, or manual for initial setup).
     *   Implement user login endpoint (`POST /api/auth/login`) using `bcryptjs` for password verification.
     *   Generate and return JSON Web Tokens (JWT) upon successful login.
@@ -45,7 +49,7 @@ To build a backend for the Field Reporter project, a Node.js application using E
     *   **PUT /api/stores/:id**: Update an existing store.
     *   **DELETE /api/stores/:id**: Delete a store.
     *   **POST /api/data/sync**: A generic endpoint to receive bulk data from the client (e.g., entire IndexedDB contents or recent changes). This will require robust parsing and upsert logic on the backend to handle existing records and new ones.
-    *   Implement corresponding database queries using `pg` for each endpoint.
+    *   Implement corresponding database queries using Prisma Client for each endpoint.
     *   Ensure all data modification endpoints are protected by the JWT middleware.
 
 5.  **Basic Admin Frontend** (120 min)
@@ -66,7 +70,7 @@ To build a backend for the Field Reporter project, a Node.js application using E
 | Phase | Duration |
 |-------|----------|
 | Dependencies & Setup | 30 min |
-| Database Setup & Migration | 60 min |
+| Database Setup & Schema Management (using Prisma) | 60 min |
 | Authentication Module | 90 min |
 | Data API Endpoints | 180 min |
 | Basic Admin Frontend | 120 min |
