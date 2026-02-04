@@ -1,6 +1,6 @@
 // Database configuration
 const DB_NAME = 'FieldReporterDB';
-const DB_VERSION = 17; // Incremented to force upgrade for missing brand stores
+const DB_VERSION = 18; // Incremented for Performance Tracking
 const USERS_STORE = 'users';
 const LOGIN_LOG_STORE = 'loginLog';
 const STORES_STORE = 'stores'; // New store for outlets
@@ -16,6 +16,7 @@ const OTHER_OBJECTIVES_STORE = 'other_objectives'; // New store for Other Object
 const LISTINGS_STORE = 'listings'; // New store for Product Listings
 const BRANDS_STORE = 'brands'; // Master list of brands
 const BRAND_STOCKS_STORE = 'brand_stocks'; // Brand stock tracking
+const PERFORMANCE_STORE = 'performance'; // Performance tracking
 
 let db;
 
@@ -111,6 +112,14 @@ function initDB() {
                 brandStocksStore.createIndex('store_id', 'store_id', { unique: false });
                 brandStocksStore.createIndex('created_on', 'created_on', { unique: false });
                 console.log('Brand Stocks store created');
+            }
+
+            // Create performance object store if it doesn't exist
+            if (!db.objectStoreNames.contains(PERFORMANCE_STORE)) {
+                const performanceStore = db.createObjectStore(PERFORMANCE_STORE, { keyPath: 'id', autoIncrement: true });
+                performanceStore.createIndex('store_id', 'store_id', { unique: false });
+                performanceStore.createIndex('created_on', 'created_on', { unique: false });
+                console.log('Performance store created');
             }
         };
     });
@@ -1037,6 +1046,42 @@ async function getBrandStocksByStore(storeId) {
     if (!db) throw new Error('Database not initialized');
     const transaction = db.transaction([BRAND_STOCKS_STORE], 'readonly');
     const objectStore = transaction.objectStore(BRAND_STOCKS_STORE);
+    const index = objectStore.index('store_id');
+    
+    return new Promise((resolve, reject) => {
+        const request = index.getAll(IDBKeyRange.only(parseInt(storeId)));
+        request.onsuccess = () => {
+            const results = request.result.sort((a, b) => new Date(b.created_on) - new Date(a.created_on));
+            resolve(results);
+        };
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Add Performance record
+ */
+async function addPerformance(performanceData) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([PERFORMANCE_STORE], 'readwrite');
+    const objectStore = transaction.objectStore(PERFORMANCE_STORE);
+    return new Promise((resolve, reject) => {
+        const request = objectStore.add({
+            ...performanceData,
+            created_on: new Date().toISOString()
+        });
+        request.onsuccess = () => resolve(request.result);
+        request.onerror = () => reject(request.error);
+    });
+}
+
+/**
+ * Get Performance records for a store
+ */
+async function getPerformanceByStore(storeId) {
+    if (!db) throw new Error('Database not initialized');
+    const transaction = db.transaction([PERFORMANCE_STORE], 'readonly');
+    const objectStore = transaction.objectStore(PERFORMANCE_STORE);
     const index = objectStore.index('store_id');
     
     return new Promise((resolve, reject) => {

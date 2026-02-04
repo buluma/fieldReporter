@@ -1,15 +1,15 @@
 <!DOCTYPE html>
 <html>
-    <head>
-        <meta charset="utf-8">
-        <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
-        <meta name="format-detection" content="telephone=no">
-        <meta name="msapplication-tap-highlight" content="no">
-        <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
-        <meta name="color-scheme" content="light dark">
-        <link rel="stylesheet" href="css/index.css">
-        <link rel="stylesheet" href="css/stores.css"> <!-- Re-use stores.css for general form/list styling -->
-        <title>Store Details - Field Reporter</title>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *; img-src 'self' data: content:;">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="msapplication-tap-highlight" content="no">
+    <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
+    <meta name="color-scheme" content="light dark">
+    <link rel="stylesheet" href="css/index.css">
+    <link rel="stylesheet" href="css/stores.css">
+    <title>Store Details - Field Reporter</title>
 </head>
 <body>
     <div class="app">
@@ -39,9 +39,12 @@
         <div class="scrollable-content">
             <div id="content" class="main-content">
                 <div class="store-nav-container" style="display: flex; justify-content: space-between; align-items: center; padding: 10px;">
-                    <button id="backToMyStoresBtn" class="btn btn-default">Back</button>
-                    <div id="checkinAction">
-                        <!-- Check-in/out button will be here -->
+                    <button id="backToStoresBtn" class="btn btn-default">Back</button>
+                    <div id="storeActions">
+                        <button id="editStoreBtn" class="btn btn-primary">Edit Outlet</button>
+                        <div id="checkinAction" style="display: inline-block; margin-left: 5px;">
+                            <!-- Check-in/out button -->
+                        </div>
                     </div>
                 </div>
 
@@ -50,7 +53,7 @@
                 </div>
 
                 <div id="storeMenu">
-                    <!-- Menu items will be dynamically populated here by store.js -->
+                    <!-- Menu items dynamically populated -->
                 </div>
 
                 <hr>
@@ -58,15 +61,82 @@
                 <div class="store-details-container" style="padding: 0 15px;">
                     <h3 id="storeName" style="margin-top: 0;">Store Name</h3>
                     <div id="storeInfo" class="list-group">
-                        <!-- Store info will be populated here -->
+                        <!-- Store info populated here -->
+                    </div>
+                </div>
+
+                <!-- Modal for editing store -->
+                <div class="modal fade" id="edit-store-modal" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h4 class="modal-title">Edit Outlet</h4>
+                            </div>
+                            <div class="modal-body">
+                                <div class="list-group">
+                                    <form id="form_edit_store">
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="edit_storename" class="form-control" placeholder="Store Name" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="edit_region" class="form-control" placeholder="Region" required>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="edit_location" class="form-control" placeholder="Store Location">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="edit_address" class="form-control" placeholder="Store Address">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="tel" id="edit_phone" class="form-control" placeholder="Store Phone">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="email" id="edit_email" class="form-control" placeholder="Store Email">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <input type="text" id="edit_contactperson" class="form-control" placeholder="Contact Person">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Associated User:</label>
+                                            <select id="edit_storeUserId" class="form-control" required>
+                                                <option value="">-- Select User --</option>
+                                                <!-- Populated by JS -->
+                                            </select>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Latitude:</label>
+                                            <input type="number" id="edit_storeLatitude" class="form-control" step="any">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <label>Longitude:</label>
+                                            <input type="number" id="edit_storeLongitude" class="form-control" step="any">
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <textarea id="edit_storeremarks" class="form-control" placeholder="Remarks" cols="30" rows="3"></textarea>
+                                        </div>
+                                        <div class="form-group list-group-item">
+                                            <button class="btn btn-primary btn-block" type="submit">Update</button>
+                                        </div>
+                                    </form>
+                                </div>
+                                <div id="editNotification" class="alert alert-success hidden">
+                                    Item Successfully Updated
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-danger pull-left" id="deleteStoreBtn">Delete</button>
+                                <button type="button" class="btn btn-default" id="closeEditModalBtn">Close</button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script src="cordova.js"></script>
-        <script src="js/db.js"></script>
-        <script src="js/app.js"></script>
-        <script src="js/store.js"></script>
+    <script src="cordova.js"></script>
+    <script src="js/db.js"></script>
+    <script src="js/app.js"></script>
+    <script src="js/store.js"></script>
 </body>
 </html>
