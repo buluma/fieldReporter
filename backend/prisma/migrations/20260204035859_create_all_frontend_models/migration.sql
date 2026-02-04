@@ -1,0 +1,157 @@
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN "email" TEXT;
+
+-- CreateTable
+CREATE TABLE "LoginLog" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "userId" TEXT NOT NULL,
+    "username" TEXT NOT NULL,
+    "timestamp" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "eventType" TEXT NOT NULL,
+    CONSTRAINT "LoginLog_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Checkin" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "sessionId" TEXT NOT NULL,
+    "checkout_time" TEXT NOT NULL,
+    "created" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    CONSTRAINT "Checkin_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Brand" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "name" TEXT NOT NULL
+);
+
+-- CreateTable
+CREATE TABLE "BrandStock" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "brandId" INTEGER NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "BrandStock_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE,
+    CONSTRAINT "BrandStock_brandId_fkey" FOREIGN KEY ("brandId") REFERENCES "Brand" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Availability" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Availability_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Placement" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Placement_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Activation" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Activation_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Visibility" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Visibility_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "TLFocus" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "TLFocus_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "TLObjective" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "TLObjective_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Objective" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Objective_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "OtherObjective" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "OtherObjective_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Listing" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Listing_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Performance" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Performance_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "Checklist" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "storeId" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "Checklist_storeId_fkey" FOREIGN KEY ("storeId") REFERENCES "Store" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateTable
+CREATE TABLE "DailyPlanner" (
+    "id" INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT,
+    "daily_date" DATETIME NOT NULL,
+    "week" INTEGER NOT NULL,
+    "month" INTEGER NOT NULL,
+    "year" INTEGER NOT NULL,
+    "submitter" TEXT NOT NULL,
+    "created_on" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "data" TEXT,
+    CONSTRAINT "DailyPlanner_submitter_fkey" FOREIGN KEY ("submitter") REFERENCES "User" ("id") ON DELETE RESTRICT ON UPDATE CASCADE
+);
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Checkin_sessionId_key" ON "Checkin"("sessionId");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "Brand_name_key" ON "Brand"("name");

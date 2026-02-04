@@ -8,23 +8,173 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(cuid())
-  username     String   @unique
+  id           String         @id @default(cuid())
+  username     String         @unique
+  email        String?
   passwordHash String
-  role         String   @default("field")
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
+  role         String         @default("field")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
   stores       Store[]
+  LoginLog     LoginLog[]
+  DailyPlanner DailyPlanner[] // Added opposite relation
+}
+
+model LoginLog {
+  id        Int      @id @default(autoincrement())
+  userId    String
+  username  String
+  timestamp DateTime @default(now())
+  eventType String
+  user      User     @relation(fields: [userId], references: [id])
 }
 
 model Store {
-  id        String   @id @default(cuid())
-  name      String   @unique
-  region    String
-  userId    String
-  latitude  Float?
-  longitude Float?
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user      User     @relation(fields: [userId], references: [id])
+  id              String         @id @default(cuid())
+  name            String         @unique
+  region          String
+  userId          String
+  latitude        Float?
+  longitude       Float?
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  user            User           @relation(fields: [userId], references: [id])
+  Checkin         Checkin[]
+  BrandStock      BrandStock[]
+  Availability    Availability[]
+  Placement       Placement[]
+  Activation      Activation[]
+  Visibility      Visibility[]
+  TLFocus         TLFocus[]
+  TLObjective     TLObjective[]
+  Objective       Objective[]
+  OtherObjective  OtherObjective[]
+  Listing         Listing[]
+  Performance     Performance[]
+  Checklist       Checklist[]
+}
+
+model Checkin {
+  id           Int      @id @default(autoincrement())
+  storeId      String
+  sessionId    String   @unique
+  checkoutTime String   @map("checkout_time")
+  createdAt    DateTime @default(now()) @map("created")
+  store        Store    @relation(fields: [storeId], references: [id])
+}
+
+model Brand {
+  id         Int          @id @default(autoincrement())
+  name       String       @unique
+  BrandStock BrandStock[]
+}
+
+model BrandStock {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  brandId   Int
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+  brand     Brand    @relation(fields: [brandId], references: [id])
+}
+
+model Availability {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Placement {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Activation {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Visibility {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model TLFocus {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model TLObjective {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Objective {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model OtherObjective {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Listing {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Performance {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model Checklist {
+  id        Int      @id @default(autoincrement())
+  storeId   String
+  createdOn DateTime @default(now()) @map("created_on")
+  data      String?
+  store     Store    @relation(fields: [storeId], references: [id])
+}
+
+model DailyPlanner {
+  id         Int      @id @default(autoincrement())
+  dailyDate  DateTime @map("daily_date")
+  week       Int
+  month      Int
+  year       Int
+  submitter  String
+  createdOn  DateTime @default(now()) @map("created_on")
+  data       String?
+  user       User     @relation(fields: [submitter], references: [id])
 }
