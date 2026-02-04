@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com https://unpkg.com 'unsafe-eval'; script-src 'self' 'unsafe-eval' https://unpkg.com; style-src 'self' 'unsafe-inline' https://unpkg.com; img-src 'self' data: content: https://unpkg.com;">
+    <meta http-equiv="Content-Security-Policy" content="default-src 'self' data: https://ssl.gstatic.com https://unpkg.com https://cdnjs.cloudflare.com 'unsafe-eval'; script-src 'self' 'unsafe-eval' https://unpkg.com https://cdnjs.cloudflare.com; style-src 'self' 'unsafe-inline' https://unpkg.com; media-src *; img-src 'self' data: content: https://unpkg.com;">
     <meta name="format-detection" content="telephone=no">
     <meta name="msapplication-tap-highlight" content="no">
     <meta name="viewport" content="initial-scale=1, width=device-width, viewport-fit=cover">
@@ -11,6 +11,11 @@
     <link rel="stylesheet" href="css/stores.css">
     <!-- Flatpickr CSS -->
     <link rel="stylesheet" href="https://unpkg.com/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .list-group-item h4 {
+            color: #337ab7;
+        }
+    </style>
     <title>Daily Planner - Field Reporter</title>
 </head>
 <body>
@@ -117,6 +122,8 @@
     <script src="cordova.js"></script>
     <script src="js/db.js"></script>
     <script src="js/app.js"></script>
+    <!-- Moment.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <!-- Flatpickr JS -->
     <script src="https://unpkg.com/flatpickr"></script>
     <script src="js/daily_planner.js"></script>

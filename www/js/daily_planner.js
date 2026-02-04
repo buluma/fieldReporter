@@ -58,7 +58,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         planIdInput.value = '0'; // Reset hidden ID
         currentPlanId = null;
         modalTitle.textContent = 'New Daily Plan';
-        document.getElementById('daily_date').valueAsDate = new Date(); // Reset date
+        // Correctly set date value for Flatpickr-enabled input
+        document.getElementById('daily_date').value = flatpickr.formatDate(new Date(), "Y-m-d");
         // Clear multi-select and re-populate
         populateStoresSelect(); 
     }
