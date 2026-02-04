@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>PrismaDB Admin</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <header class="hero">
+        <div>
+          <p class="eyebrow">Field Reporter</p>
+          <h1>PrismaDB Admin</h1>
+          <p class="subtitle">
+            Browse users stored in the backend database and check service
+            status.
+          </p>
+        </div>
+        <div class="status" id="serviceStatus">
+          <span class="dot" aria-hidden="true"></span>
+          <div>
+            <p class="label">Service status</p>
+            <p class="value">Checking…</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="card">
+        <div class="card-header">
+          <div>
+            <h2>Users</h2>
+            <p>All registered users in PrismaDB.</p>
+          </div>
+          <button class="button" type="button" id="refreshUsers">
+            Refresh
+          </button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Role</th>
+                <th>Created</th>
+                <th>Updated</th>
+              </tr>
+            </thead>
+            <tbody id="usersBody">
+              <tr>
+                <td colspan="4" class="empty">Loading users…</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+    <script src="/script.js"></script>
+  </body>
+</html>
