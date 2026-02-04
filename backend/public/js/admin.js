@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             if (usersResponse.ok) {
-                const { users } = await usersResponse.json();
+                const users = await usersResponse.json();
                 renderUsers(users);
             } else {
                 handleAuthError(usersResponse);
